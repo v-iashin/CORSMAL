@@ -33,7 +33,7 @@ For example:
 
 
 ## Output
-Each approach should return predictions for test set `your_approach.csv`. Please use `Submission_form.csv` for your reference. Leave other field to be empty, i.e. when predicting `filling_type` a line in `your_approach.csv` should be of format: `10,0001,,,0,,`
+Each approach should return predictions for test set `your_approach.csv`. Please use `Submission_form.csv` for your reference. Leave other field to be empty, i.e. when predicting `filling_type` a line in `your_approach.csv` should be of format: `container_id,sequence,prob0,prob1,prob2,prob3`.
 
 ## Submission
 Please, use `main.py` which will aggregate the predictions from each task and form the final prediction on the test-set
