@@ -8,7 +8,7 @@ import os
 import numpy as np
 import pandas as pd
 import torch
-from torch.nn.utils.rnn import pack_padded_sequence, pad_sequence
+from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader
 
 class AudioDataset(torch.utils.data.Dataset):

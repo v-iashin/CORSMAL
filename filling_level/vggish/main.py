@@ -3,7 +3,7 @@ import copy
 import os
 import pathlib
 import random
-import time
+from sklearn.metrics import f1_score, precision_score, recall_score, accuracy_score
 from time import localtime, strftime
 import numpy as np
 import pandas as pd
@@ -19,9 +19,6 @@ def get_cmd_args() -> argparse.Namespace:
     parser.add_argument('--output_dim', default=3, type=int)
     parser.add_argument('--model_type', default='GRU')
     parser.add_argument('--bi_dir', dest='bi_dir', action='store_true', default=False)
-    parser.add_argument('--train_types', default=[1, 2, 4, 5], type=int, nargs='+')
-    parser.add_argument('--valid_types', default=[3, 6, 9], type=int, nargs='+')
-    parser.add_argument('--test_types', default=[10, 11, 12], type=int, nargs='+')
     parser.add_argument('--device', default='cuda:0')
     parser.add_argument('--data_root', default='/home/nvme/vladimir/corsmal/features')
     parser.add_argument('--batch_size', default=64, type=int)
@@ -29,7 +26,7 @@ def get_cmd_args() -> argparse.Namespace:
     parser.add_argument('--hidden_dim', default=256, type=int)
     parser.add_argument('--n_layers', default=5, type=int)
     parser.add_argument('--drop_p', default=0.0, type=float)
-    parser.add_argument('--num_epochs', default=50, type=int)
+    parser.add_argument('--num_epochs', default=5, type=int)
     parser.add_argument('--seed', default=1337, type=int)
     args = parser.parse_args()
     return args
@@ -82,15 +79,16 @@ def set_seed(seed):
     torch.cuda.manual_seed_all(seed)
 
 
-def experiment(cfg):
+def experiment(cfg, fold):
+    print(fold)
     set_seed(cfg.seed)
 
     device = torch.device(cfg.device)
 
     datasets = {
-        'train': AudioDataset(cfg.data_root, cfg.train_types, 'train'),
-        'valid': AudioDataset(cfg.data_root, cfg.valid_types, 'valid'),
-        'test': AudioDataset(cfg.data_root, cfg.test_types, 'test'),
+        'train': AudioDataset(cfg.data_root, fold['train'], 'train'),
+        'valid': AudioDataset(cfg.data_root, fold['valid'], 'valid'),
+        'test': AudioDataset(cfg.data_root, fold['test'], 'test'),
     }
 
     dataloaders = {
@@ -117,11 +115,12 @@ def experiment(cfg):
     criterion = torch.nn.CrossEntropyLoss()
     # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
-    best_acc = 0.0
-    since = time.time()
+    best_metric = 0.0
+    best_epoch = 0
     best_model_wts = copy.deepcopy(model.state_dict())
 
     for epoch in range(cfg.num_epochs):
+        print(f'Epoch: {epoch+1}')
         for phase in ['train', 'valid']:
             if phase == 'train':
                 model.train()  # Set model to training mode
@@ -129,7 +128,9 @@ def experiment(cfg):
                 model.eval()   # Set model to evaluate mode
 
             running_loss = 0.0
-            running_corrects = 0
+            # running_corrects = 0
+            y_pred = []
+            y_true = []
 
             # Iterate over data.
             for batch in dataloaders[phase]:
@@ -153,44 +154,56 @@ def experiment(cfg):
 
                 # statistics
                 running_loss += loss.item() * inputs.size(0)
-                running_corrects += torch.sum(preds == targets.data)
+                # running_corrects += torch.sum(preds == targets.data)
+                y_pred.extend(preds.tolist())
+                y_true.extend(targets.tolist())
+
             # if phase == 'train':
             #     scheduler.step()
 
+            # epoch_acc = running_corrects.double() / len(datasets[phase])
             epoch_loss = running_loss / len(datasets[phase])
-            epoch_acc = running_corrects.double() / len(datasets[phase])
+            f1_ep = f1_score(y_true, y_pred, average='weighted')
+            precision_ep = precision_score(y_true, y_pred, average='weighted')
+            recall_ep = recall_score(y_true, y_pred, average='weighted')
+            accuracy_ep = accuracy_score(y_true, y_pred)
 
-            print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss, epoch_acc))
+            # print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss, epoch_acc))
+            print(f'({phase}): L: {epoch_loss:3f}; A: {accuracy_ep:3f}; R: {recall_ep:3f}; ' +
+                  f'P: {precision_ep:3f}; F1: {f1_ep:3f}')
 
             # deep copy the model
-            if phase == 'valid' and epoch_acc > best_acc:
-                best_acc = epoch_acc
+            if phase == 'valid' and f1_ep > best_metric:
+                best_metric = f1_ep
+                best_epoch = epoch
                 best_model_wts = copy.deepcopy(model.state_dict())
 
-        print()
-
-    time_elapsed = time.time() - since
-    print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
-    print('Best val Acc: {:4f}'.format(best_acc))
+    print(f'Best val Metric {best_metric:3f} @ {best_epoch}\n')
 
     # load best model weights
     model.load_state_dict(best_model_wts)
 
-    # phase
-    phase = 'test'
+    # make predictions
+    predict(cfg, model, dataloaders['train'],
+            f'./predictions/{cfg.task}_train_{"_".join([str(i) for i in fold["train"]])}_vggish.csv')
+    predict(cfg, model, dataloaders['valid'],
+            f'./predictions/{cfg.task}_valid_{"_".join([str(i) for i in fold["valid"]])}_vggish.csv')
+    predict(cfg, model, dataloaders['test'], f'./predictions/{cfg.task}_test_vggish.csv')
 
-    # ## TESTING
-    # Iterate over data.
-    # Object,Sequence,Container capacity [mL],Container mass [g],Filling type,Filling level [%],Filling mass [g]
-    test_prediction = {
+    return best_metric
+
+def predict(cfg, model, loader, save_path):
+    device = torch.device(cfg.device)
+
+    predictions = {
         'Object': [],
         'Sequence': [],
     }
 
     for c in range(cfg.output_dim):
-        test_prediction[f'{cfg.task}_prob_{c}'] = []
+        predictions[f'{cfg.task}_prob_{c}'] = []
 
-    for batch in dataloaders[phase]:
+    for batch in loader:
         inputs = batch['inputs'].to(device)
 
         with torch.set_grad_enabled(False):
@@ -200,15 +213,24 @@ def experiment(cfg):
 
         for i in range(len(batch['paths'])):
             sequence = pathlib.Path(batch['paths'][i]).stem.replace('_audio', '')
-            test_prediction['Object'].append(batch['containers'][i])
-            test_prediction['Sequence'].append(sequence.replace('_vggish', ''))
+            predictions['Object'].append(batch['containers'][i])
+            predictions['Sequence'].append(sequence.replace('_vggish', ''))
             for c in range(cfg.output_dim):
-                test_prediction[f'{cfg.task}_prob_{c}'].append(softmaxed[i, c].item())
+                predictions[f'{cfg.task}_prob_{c}'].append(softmaxed[i, c].item())
 
-    pd.DataFrame.from_dict(test_prediction).to_csv(f'{cfg.task}_vggish.csv', index=False)
+    pd.DataFrame.from_dict(predictions).sort_values(['Object', 'Sequence']).to_csv(save_path, index=False)
 
 
 if __name__ == "__main__":
     cfg = Config()
     cfg.load_from(cmd_args=get_cmd_args())
-    experiment(cfg)
+
+    folds = [
+        {'train': [1, 2, 4, 5, 7, 8], 'valid': [3, 6, 9], 'test': [10, 11, 12]},
+        {'train': [1, 3, 4, 6, 7, 9], 'valid': [2, 5, 8], 'test': [10, 11, 12]},
+        {'train': [2, 3, 5, 6, 8, 9], 'valid': [1, 4, 7], 'test': [10, 11, 12]}
+    ]
+
+    best_fold_metrics = [experiment(cfg, fold) for fold in folds]
+
+    print(f'Average of Best Metrics on Each Valid Set: {np.mean(best_fold_metrics):4f}')

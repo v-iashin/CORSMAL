@@ -35,6 +35,7 @@ dependencies:
   - ipywidgets=7.5.1=py_0
   - jedi=0.17.2=py38_0
   - jinja2=2.11.2=py_0
+  - joblib=0.16.0=py_0
   - jpeg=9b=h024ee3a_2
   - jsonschema=3.2.0=py38_0
   - jupyter=1.0.0=py38_7
@@ -46,6 +47,7 @@ dependencies:
   - libedit=3.1.20191231=h14c3975_1
   - libffi=3.3=he6710b0_2
   - libgcc-ng=9.1.0=hdf63c60_0
+  - libgfortran-ng=7.3.0=hdf63c60_0
   - libpng=1.6.37=hbc83047_0
   - libsodium=1.0.18=h7b6447c_0
   - libstdcxx-ng=9.1.0=hdf63c60_0
@@ -100,6 +102,8 @@ dependencies:
   - qtconsole=4.7.6=py_0
   - qtpy=1.9.0=py_0
   - readline=8.0=h7b6447c_0
+  - scikit-learn=0.23.2=py38h0573a6f_0
+  - scipy=1.5.2=py38h0b6359f_0
   - send2trash=1.5.0=py38_0
   - setuptools=49.6.0=py38_0
   - sip=4.19.13=py38he6710b0_0
@@ -107,6 +111,7 @@ dependencies:
   - sqlite=3.33.0=h62c20be_0
   - terminado=0.8.3=py38_0
   - testpath=0.4.4=py_0
+  - threadpoolctl=2.1.0=pyh5ca1d4c_0
   - tk=8.6.10=hbc83047_0
   - toml=0.10.1=py_0
   - torchvision=0.7.0=py38_cu102
@@ -121,5 +126,3 @@ dependencies:
   - zipp=3.1.0=py_0
   - zlib=1.2.11=h7b6447c_3
   - zstd=1.4.5=h9ceee32_0
-prefix: /home/vladimir/miniconda3/envs/corsmal
-
