@@ -6,10 +6,11 @@ import torch
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader
 
-class AudioDataset(torch.utils.data.Dataset):
+
+class RGBDataset(torch.utils.data.Dataset):
 
     def __init__(self, data_root, types, phase):
-        super(AudioDataset, self).__init__()
+        super(RGBDataset, self).__init__()
         self.data_root = data_root
         self.types = types
         self.phase = phase
@@ -17,8 +18,19 @@ class AudioDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         meta_i = self.dataset.iloc[index].to_dict()
-        path = os.path.join(self.data_root, meta_i['path'])
-        inputs = torch.from_numpy(np.load(path))
+        # contruct paths to cameras from the same event
+        base_path = os.path.join(self.data_root, meta_i['path']).replace('_c1_rgb.npy', '')
+        paths = [
+            f'{base_path}_c1_rgb.npy',
+            f'{base_path}_c2_rgb.npy',
+            f'{base_path}_c3_rgb.npy',
+            f'{base_path}_c4_rgb.npy'
+        ]
+        # (cam_num, T, D)
+        inputs = torch.cat([torch.from_numpy(np.load(path))[np.newaxis, ...] for path in paths])
+        # for pad_sequence we will flip dims
+        # (T, cam_num, D)
+        inputs = inputs.permute((1, 0, 2))
 
         if self.phase == 'test':
             targets = None
@@ -31,7 +43,7 @@ class AudioDataset(torch.utils.data.Dataset):
         item = {
             'targets': targets,
             'inputs': inputs,
-            'path': path,
+            'path': base_path,
             'container': meta_i['container']
         }
 
@@ -47,10 +59,11 @@ class AudioDataset(torch.utils.data.Dataset):
             'paths': [item['path'] for item in batch],
             'containers': [item['container'] for item in batch]
         }
-        # lengths = [len(item['inputs']) for item in batch]
+
         padded_seq = pad_sequence([item['inputs'] for item in batch], batch_first=True, padding_value=-10)
         # out['inputs'] = pack_padded_sequence(padded_seq, lengths, batch_first=True, enforce_sorted=False)
-        out['inputs'] = padded_seq
+        # (B, cam_num, T, D) <- (B, T, cam_num, D)
+        out['inputs'] = padded_seq.permute((0, 2, 1, 3))
 
         if self.phase == 'test':
             out['targets'] = None
@@ -71,17 +84,17 @@ class AudioDataset(torch.utils.data.Dataset):
             'lights': [],
         }
         for container_type in self.types:
-            # form list of paths
-            paths = sorted(glob(os.path.join(self.data_root, f'{container_type}', 'vggish', '*.npy')))
+            # form list of paths (will use only paths to c1 but later use all 4 cameras)
+            paths = sorted(glob(os.path.join(self.data_root, f'{container_type}', 'r21d_rgb', '*c1_rgb.npy')))
             paths = [path.replace(f'{self.data_root}/', '') for path in paths]
             # parse the file names
             for path in paths:
-                # '/home/nvme/vladimir/corsmal/X/vggish || sX_fiX_fuX_bX_lX_vggish.npy'
-                container_path, filename = os.path.split(path)
+                # '/X/vggish || sX_fiX_fuX_bX_lX_vggish.npy'
+                _, filename = os.path.split(path)
                 # s2 fi1 fu1 b1 l0 <- 'sX_fiX_fuX_bX_lX.mp4'
                 # 0000 cX <- 0000_c1.mp4
                 if 1 <= container_type <= 9:
-                    subj, ftype, flevel, backgr, lights = filename.replace('_audio_vggish.npy', '').split('_')
+                    subj, ftype, flevel, backgr, lights = filename.replace('_c1_rgb.npy', '').split('_')
                     dataset['path'].append(path)
                     dataset['container'].append(container_type)
                     dataset['subject'].append(subj.replace('s', ''))
@@ -105,9 +118,9 @@ class AudioDataset(torch.utils.data.Dataset):
 if __name__ == "__main__":
     DATA_ROOT = '/home/nvme/vladimir/corsmal/features'
 
-    train = AudioDataset(DATA_ROOT, [1, 2, 3, 4, 5, 6], 'train')
-    valid = AudioDataset(DATA_ROOT, [7, 8, 9], 'valid')
-    test = AudioDataset(DATA_ROOT, [10, 11, 12], 'test')
+    train = RGBDataset(DATA_ROOT, [1, 2, 3, 4, 5, 6], 'train')
+    valid = RGBDataset(DATA_ROOT, [7, 8, 9], 'valid')
+    test = RGBDataset(DATA_ROOT, [10, 11, 12], 'test')
 
     train_loader = DataLoader(train, batch_size=4, shuffle=True, collate_fn=train.collate_fn)
     valid_loader = DataLoader(valid, batch_size=2, shuffle=False, collate_fn=valid.collate_fn)

@@ -1,0 +1,14 @@
+init_time: 200903213714
+task: ftype
+output_dim: 4
+model_type: GRU
+bi_dir: False
+device: cuda:1
+data_root: /home/nvme/vladimir/corsmal/features
+drop_p: 0.0
+batch_size: 64
+input_dim: 512
+hidden_dim: 256
+n_layers: 2
+num_epochs: 30
+seed: 1337

@@ -7,3 +7,9 @@
 4. Predictions are saved into `./predictions` folder for each fold, phase (train/valid/test). Props for each class is also provided.
 
 Result: F1 (avg F1 across folds): 0.755
+
+## R(2+1)D
+
+The procedure is quite similar to VGGish. Extract `R(2+1)D RGB` instead of `VGGish` features and the rest is the same
+
+Result: F1 (avg F1 across folds): 0.747

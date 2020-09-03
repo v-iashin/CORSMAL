@@ -4,3 +4,6 @@
 [submodule "filling_level/vggish/video_features"]
 	path = filling_level/vggish/video_features
 	url = https://github.com/v-iashin/video_features.git
+[submodule "filling_level/r21d_rgb/video_features"]
+	path = filling_level/r21d_rgb/video_features
+	url = https://github.com/v-iashin/video_features.git

@@ -11,7 +11,7 @@ import pandas as pd
 import torch
 from model import RNN
 from torch.utils.data import DataLoader
-from dataset import AudioDataset
+from dataset import RGBDataset
 
 
 def get_cmd_args() -> argparse.Namespace:
@@ -23,7 +23,7 @@ def get_cmd_args() -> argparse.Namespace:
     parser.add_argument('--device', default='cuda:0')
     parser.add_argument('--data_root', default='/home/nvme/vladimir/corsmal/features')
     parser.add_argument('--batch_size', default=64, type=int)
-    parser.add_argument('--input_dim', default=128, type=int)
+    parser.add_argument('--input_dim', default=512, type=int)
     parser.add_argument('--hidden_dim', default=256, type=int)
     parser.add_argument('--n_layers', default=5, type=int)
     parser.add_argument('--drop_p', default=0.0, type=float)
@@ -96,9 +96,9 @@ def experiment(cfg, fold):
     device = torch.device(cfg.device)
 
     datasets = {
-        'train': AudioDataset(cfg.data_root, fold['train'], 'train'),
-        'valid': AudioDataset(cfg.data_root, fold['valid'], 'valid'),
-        'test': AudioDataset(cfg.data_root, fold['test'], 'test'),
+        'train': RGBDataset(cfg.data_root, fold['train'], 'train'),
+        'valid': RGBDataset(cfg.data_root, fold['valid'], 'valid'),
+        'test': RGBDataset(cfg.data_root, fold['test'], 'test'),
     }
 
     dataloaders = {
@@ -116,25 +116,49 @@ def experiment(cfg, fold):
         )
     }
 
-    model = RNN(
+    model_c1 = RNN(
         cfg.model_type, cfg.input_dim, cfg.hidden_dim, cfg.n_layers, cfg.drop_p, cfg.output_dim, cfg.bi_dir
     )
-    model = model.to(device)
+    model_c2 = RNN(
+        cfg.model_type, cfg.input_dim, cfg.hidden_dim, cfg.n_layers, cfg.drop_p, cfg.output_dim, cfg.bi_dir
+    )
+    model_c3 = RNN(
+        cfg.model_type, cfg.input_dim, cfg.hidden_dim, cfg.n_layers, cfg.drop_p, cfg.output_dim, cfg.bi_dir
+    )
+    model_c4 = RNN(
+        cfg.model_type, cfg.input_dim, cfg.hidden_dim, cfg.n_layers, cfg.drop_p, cfg.output_dim, cfg.bi_dir
+    )
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)
+    model_c1 = model_c1.to(device)
+    model_c2 = model_c2.to(device)
+    model_c3 = model_c3.to(device)
+    model_c4 = model_c4.to(device)
+
+    params = list(model_c1.parameters()) + list(model_c2.parameters()) + list(model_c3.parameters()) + list(model_c4.parameters())
+
+    optimizer = torch.optim.Adam(params, lr=1e-4)
     criterion = torch.nn.CrossEntropyLoss()
     # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
     best_metric = 0.0
     best_epoch = 0
-    best_model_wts = copy.deepcopy(model.state_dict())
+    best_model_wts_c1 = copy.deepcopy(model_c1.state_dict())
+    best_model_wts_c2 = copy.deepcopy(model_c2.state_dict())
+    best_model_wts_c3 = copy.deepcopy(model_c3.state_dict())
+    best_model_wts_c4 = copy.deepcopy(model_c4.state_dict())
 
     for epoch in range(cfg.num_epochs):
         for phase in ['train', 'valid']:
             if phase == 'train':
-                model.train()  # Set model to training mode
+                model_c1.train()  # Set model to training mode
+                model_c2.train()  # Set model to training mode
+                model_c3.train()  # Set model to training mode
+                model_c4.train()  # Set model to training mode
             else:
-                model.eval()   # Set model to evaluate mode
+                model_c1.eval()  # Set model to training mode
+                model_c2.eval()  # Set model to training mode
+                model_c3.eval()  # Set model to training mode
+                model_c4.eval()  # Set model to training mode
 
             running_loss = 0.0
             # running_corrects = 0
@@ -143,6 +167,7 @@ def experiment(cfg, fold):
 
             # Iterate over data.
             for batch in dataloaders[phase]:
+                # (B, num_cam, T, D)
                 inputs = batch['inputs'].to(device)
                 targets = batch['targets'][cfg.task].to(device)
 
@@ -152,7 +177,14 @@ def experiment(cfg, fold):
                 # forward
                 # track history if only in train
                 with torch.set_grad_enabled(phase == 'train'):
-                    outputs, hiddens = model(inputs)
+                    # (B, T, D)
+                    outputs_c1, hiddens = model_c1(inputs[:, 0, :, :])
+                    outputs_c2, hiddens = model_c2(inputs[:, 1, :, :])
+                    outputs_c3, hiddens = model_c3(inputs[:, 2, :, :])
+                    outputs_c4, hiddens = model_c4(inputs[:, 3, :, :])
+
+                    outputs = outputs_c1 + outputs_c2 + outputs_c3 + outputs_c4
+
                     _, preds = torch.max(outputs, 1)
                     loss = criterion(outputs, targets)
 
@@ -185,29 +217,39 @@ def experiment(cfg, fold):
             if phase == 'valid' and f1_ep > best_metric:
                 best_metric = f1_ep
                 best_epoch = epoch
-                best_model_wts = copy.deepcopy(model.state_dict())
+                best_model_wts_c1 = copy.deepcopy(model_c1.state_dict())
+                best_model_wts_c2 = copy.deepcopy(model_c2.state_dict())
+                best_model_wts_c3 = copy.deepcopy(model_c3.state_dict())
+                best_model_wts_c4 = copy.deepcopy(model_c4.state_dict())
 
     print(f'Best val Metric {best_metric:3f} @ {best_epoch+1}\n')
 
     # load best model weights
-    model.load_state_dict(best_model_wts)
+    model_c1.load_state_dict(best_model_wts_c1)
+    model_c2.load_state_dict(best_model_wts_c2)
+    model_c3.load_state_dict(best_model_wts_c3)
+    model_c4.load_state_dict(best_model_wts_c4)
 
     # make predictions
     predict(
-        cfg, model, dataloaders['train'],
+        cfg, model_c1, model_c2, model_c3, model_c4, dataloaders['train'],
         f'./predictions/{cfg.init_time}/{cfg.task}_train_{"_".join([str(i) for i in fold["train"]])}_vggish.csv')
     predict(
-        cfg, model, dataloaders['valid'],
+        cfg, model_c1, model_c2, model_c3, model_c4, dataloaders['valid'],
         f'./predictions/{cfg.init_time}/{cfg.task}_valid_{"_".join([str(i) for i in fold["valid"]])}_vggish.csv')
     test_predictions = predict(
-        cfg, model, dataloaders['test'],
+        cfg, model_c1, model_c2, model_c3, model_c4, dataloaders['test'],
         f'./predictions/{cfg.init_time}/{cfg.task}_test_trained_on_{"_".join([str(i) for i in fold["train"]])}_vggish.csv')
 
     return best_metric, test_predictions
 
-def predict(cfg, model, loader, save_path):
+
+def predict(cfg, model_c1, model_c2, model_c3, model_c4, loader, save_path):
     # just to be sure
-    model.eval()
+    model_c1.eval()
+    model_c2.eval()
+    model_c3.eval()
+    model_c4.eval()
     device = torch.device(cfg.device)
 
     predictions = {
@@ -222,7 +264,14 @@ def predict(cfg, model, loader, save_path):
         inputs = batch['inputs'].to(device)
 
         with torch.set_grad_enabled(False):
-            outputs, hiddens = model(inputs)
+            # (B, T, D)
+            outputs_c1, hiddens = model_c1(inputs[:, 0, :, :])
+            outputs_c2, hiddens = model_c2(inputs[:, 1, :, :])
+            outputs_c3, hiddens = model_c3(inputs[:, 2, :, :])
+            outputs_c4, hiddens = model_c4(inputs[:, 3, :, :])
+
+            outputs = outputs_c1 + outputs_c2 + outputs_c3 + outputs_c4
+
             _, preds = torch.max(outputs, 1)
             softmaxed = torch.nn.functional.softmax(outputs, dim=-1)
 
