@@ -184,11 +184,15 @@ def experiment(cfg, fold):
     model.load_state_dict(best_model_wts)
 
     # make predictions
-    predict(cfg, model, dataloaders['train'],
-            f'./predictions/{cfg.task}_train_{"_".join([str(i) for i in fold["train"]])}_vggish.csv')
-    predict(cfg, model, dataloaders['valid'],
-            f'./predictions/{cfg.task}_valid_{"_".join([str(i) for i in fold["valid"]])}_vggish.csv')
-    predict(cfg, model, dataloaders['test'], f'./predictions/{cfg.task}_test_vggish.csv')
+    predict(
+        cfg, model, dataloaders['train'],
+        f'./predictions/{cfg.init_time}/{cfg.task}_train_{"_".join([str(i) for i in fold["train"]])}_vggish.csv')
+    predict(
+        cfg, model, dataloaders['valid'],
+        f'./predictions/{cfg.init_time}/{cfg.task}_valid_{"_".join([str(i) for i in fold["valid"]])}_vggish.csv')
+    predict(
+        cfg, model, dataloaders['test'],
+        f'./predictions/{cfg.init_time}/{cfg.task}_test_vggish.csv')
 
     return best_metric
 
@@ -220,17 +224,20 @@ def predict(cfg, model, loader, save_path):
 
     pd.DataFrame.from_dict(predictions).sort_values(['Object', 'Sequence']).to_csv(save_path, index=False)
 
-
-if __name__ == "__main__":
-    cfg = Config()
-    cfg.load_from(cmd_args=get_cmd_args())
-
+def run_kfold(cfg):
+    save_results = os.path.join('./predictions/', cfg.init_time)
+    os.makedirs(save_results)
+    cfg.save_self_to(os.path.join(save_results, 'cfg.txt'))
     folds = [
         {'train': [1, 2, 4, 5, 7, 8], 'valid': [3, 6, 9], 'test': [10, 11, 12]},
         {'train': [1, 3, 4, 6, 7, 9], 'valid': [2, 5, 8], 'test': [10, 11, 12]},
         {'train': [2, 3, 5, 6, 8, 9], 'valid': [1, 4, 7], 'test': [10, 11, 12]}
     ]
-
     best_fold_metrics = [experiment(cfg, fold) for fold in folds]
+    print(f'Average of Best Metrics on Each Valid Set: {np.mean(best_fold_metrics):4f}, {cfg.init_time}')
 
-    print(f'Average of Best Metrics on Each Valid Set: {np.mean(best_fold_metrics):4f}')
+
+if __name__ == "__main__":
+    cfg = Config()
+    cfg.load_from(cmd_args=get_cmd_args())
+    run_kfold(cfg)
