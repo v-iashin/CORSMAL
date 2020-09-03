@@ -187,7 +187,7 @@ def experiment(cfg, fold):
                 best_epoch = epoch
                 best_model_wts = copy.deepcopy(model.state_dict())
 
-    print(f'Best val Metric {best_metric:3f} @ {best_epoch}\n')
+    print(f'Best val Metric {best_metric:3f} @ {best_epoch+1}\n')
 
     # load best model weights
     model.load_state_dict(best_model_wts)
@@ -199,11 +199,11 @@ def experiment(cfg, fold):
     predict(
         cfg, model, dataloaders['valid'],
         f'./predictions/{cfg.init_time}/{cfg.task}_valid_{"_".join([str(i) for i in fold["valid"]])}_vggish.csv')
-    predict(
+    test_predictions = predict(
         cfg, model, dataloaders['test'],
-        f'./predictions/{cfg.init_time}/{cfg.task}_test_vggish.csv')
+        f'./predictions/{cfg.init_time}/{cfg.task}_test_trained_on_{"_".join([str(i) for i in fold["train"]])}_vggish.csv')
 
-    return best_metric
+    return best_metric, test_predictions
 
 def predict(cfg, model, loader, save_path):
     device = torch.device(cfg.device)
@@ -231,12 +231,14 @@ def predict(cfg, model, loader, save_path):
             for c in range(cfg.output_dim):
                 predictions[f'{cfg.task}_prob_{c}'].append(softmaxed[i, c].item())
 
-    pd.DataFrame.from_dict(predictions).sort_values(['Object', 'Sequence']).to_csv(save_path, index=False)
+    predictions_dataset = pd.DataFrame.from_dict(predictions).sort_values(['Object', 'Sequence'])
+    predictions_dataset.to_csv(save_path, index=False)
+    # returning the dataset because it will be useful for test-time prediction averaging
+    return predictions_dataset
 
 def run_kfold(cfg):
     save_results = os.path.join('./predictions/', str(cfg.init_time))
-    if os.path.exists(save_results):
-        save_results += f'_{strftime("%y%m%d%H%M%S", localtime())}'
+    # replace cfg.init_time  with current time f'_{strftime("%y%m%d%H%M%S", localtime())}'
     os.makedirs(save_results)
     cfg.save_self_to(os.path.join(save_results, 'cfg.txt'))
     folds = [
@@ -244,20 +246,35 @@ def run_kfold(cfg):
         {'train': [1, 3, 4, 6, 7, 9], 'valid': [2, 5, 8], 'test': [10, 11, 12]},
         {'train': [2, 3, 5, 6, 8, 9], 'valid': [1, 4, 7], 'test': [10, 11, 12]}
     ]
-    best_fold_metrics = [experiment(cfg, fold) for fold in folds]
+    best_fold_metrics_and_test_predictions = [experiment(cfg, fold) for fold in folds]
+    best_fold_metrics = [metric for metric, _ in best_fold_metrics_and_test_predictions]
+    test_predictions = [preds for _, preds in best_fold_metrics_and_test_predictions]
     print(f'Average of Best Metrics on Each Valid Set: {np.mean(best_fold_metrics):4f}, {cfg.init_time}')
+
+    # averaging predictions from all tree folds
+    aggregated_dataset = test_predictions[0].copy()
+
+    for c in range(cfg.output_dim):
+        column = f'{cfg.task}_prob_{c}'
+        fold_columns = [test_predictions[f][column] for f in range(len(folds))]
+        aggregated_dataset[column] = np.mean(fold_columns, axis=0)
+
+    aggregated_dataset.to_csv(
+        os.path.join(save_results, f'{cfg.task}_test_agg_vggish.csv'),
+        index=False
+    )
 
 
 if __name__ == "__main__":
-    # cfg = Config()
-    # cfg.load_from(cmd_args=get_cmd_args())
-    # run_kfold(cfg)
-
-    # Reproduce the best experiment
-    # Average of Best Metrics on Each Valid Set: 0.755171,
-    exp_name = 200903132516
-
     cfg = Config()
-    cfg.load_from(path=f'./predictions/{exp_name}/cfg.txt')
-    print(type(cfg.drop_p))
+    cfg.load_from(cmd_args=get_cmd_args())
     run_kfold(cfg)
+
+    # # Reproduce the best experiment
+    # # Average of Best Metrics on Each Valid Set: 0.755171,
+    # exp_name = 200903132516
+
+    # cfg = Config()
+    # cfg.load_from(path=f'./predictions/{exp_name}/cfg.txt')
+    # print(type(cfg.drop_p))
+    # run_kfold(cfg)
