@@ -1,4 +1,5 @@
 import argparse
+import ast
 import copy
 import os
 import pathlib
@@ -48,6 +49,18 @@ class Config(object):
             for key, val in vars(self).items():
                 fwrite.write(f'{key}: {val}\n')
 
+    def guess_type(self, s):
+        try:
+            value = ast.literal_eval(s)
+            if value is False:
+                return False
+        except ValueError:
+            return str(s)
+        except SyntaxError:
+            return str(s)
+        else:
+            return type(value)(s)
+
     def load_from(self, cmd_args: argparse.Namespace = None, path: str = None, verbose: bool = True):
         '''Loads self from either user specified cmd line args (training) or a text file (pre-trained)'''
         if cmd_args:
@@ -57,10 +70,7 @@ class Config(object):
             with open(path) as fread:
                 for line in fread:
                     key, val = line.strip('\n').split(': ')
-                    # step_size: 15. '15' will be interpreted as string -- preventing this
-                    # TODO: what to do if float 1e-4
-                    if all(map(str.isdigit, val)):
-                        val = int(val)
+                    val = self.guess_type(val)
                     iter_with_vars.append((key, val))
         else:
             assert cmd_args is None and path is None
@@ -120,7 +130,6 @@ def experiment(cfg, fold):
     best_model_wts = copy.deepcopy(model.state_dict())
 
     for epoch in range(cfg.num_epochs):
-        print(f'Epoch: {epoch+1}')
         for phase in ['train', 'valid']:
             if phase == 'train':
                 model.train()  # Set model to training mode
@@ -169,7 +178,7 @@ def experiment(cfg, fold):
             accuracy_ep = accuracy_score(y_true, y_pred)
 
             # print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss, epoch_acc))
-            print(f'({phase}): L: {epoch_loss:3f}; A: {accuracy_ep:3f}; R: {recall_ep:3f}; ' +
+            print(f'({phase} @ {epoch+1}): L: {epoch_loss:3f}; A: {accuracy_ep:3f}; R: {recall_ep:3f}; ' +
                   f'P: {precision_ep:3f}; F1: {f1_ep:3f}')
 
             # deep copy the model
@@ -225,7 +234,9 @@ def predict(cfg, model, loader, save_path):
     pd.DataFrame.from_dict(predictions).sort_values(['Object', 'Sequence']).to_csv(save_path, index=False)
 
 def run_kfold(cfg):
-    save_results = os.path.join('./predictions/', cfg.init_time)
+    save_results = os.path.join('./predictions/', str(cfg.init_time))
+    if os.path.exists(save_results):
+        save_results += f'_{strftime("%y%m%d%H%M%S", localtime())}'
     os.makedirs(save_results)
     cfg.save_self_to(os.path.join(save_results, 'cfg.txt'))
     folds = [
@@ -238,6 +249,15 @@ def run_kfold(cfg):
 
 
 if __name__ == "__main__":
+    # cfg = Config()
+    # cfg.load_from(cmd_args=get_cmd_args())
+    # run_kfold(cfg)
+
+    # Reproduce the best experiment
+    # Average of Best Metrics on Each Valid Set: 0.755171,
+    exp_name = 200903132516
+
     cfg = Config()
-    cfg.load_from(cmd_args=get_cmd_args())
+    cfg.load_from(path=f'./predictions/{exp_name}/cfg.txt')
+    print(type(cfg.drop_p))
     run_kfold(cfg)
