@@ -5,7 +5,7 @@ import os, argparse, sys
 import pandas as pd
 import re
 
-# import pdb
+import pdb
 
 def choose_index(i):
     # print(rowlist)
@@ -76,6 +76,7 @@ if __name__ == '__main__':
         # clear column names
         df = df[df.columns.drop(list(df.filter(regex='Unnamed')))]
         df = df.rename(columns=lambda x: re.sub(r'^.+prob[_ ]?(\d)',args.classname+r' prob\1', x))
+        df = df.sort_values(['Object', 'Sequence'])
         # put into list
         df_list.append(df)
 
@@ -107,7 +108,7 @@ if __name__ == '__main__':
         df_combined = df_combined.append(new_row, ignore_index=True)
 
         if args.validation:
-            true_val = df_truth.loc[(df['Object'] == row['Object']) & (df['Sequence'] == row['Sequence'])][args.classname].iloc[0]
+            true_val = df_truth.loc[(df_truth['Object'] == row['Object']) & (df_truth['Sequence'] == row['Sequence'])][args.classname].iloc[0]
             if int(label) == true_val:
                 true_pred += 1.0
 
