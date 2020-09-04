@@ -41,3 +41,37 @@ Each folder in this repo correspond to a dedicated task. Filling level and types
 
 ## How to run
 Please follow the instructions provided in individual sub-tasks folders.
+
+We combine the results of `vggish` and `pyAudioAnalysis` to predict the filling type. Use the following to run the combination. First **filling type**:
+
+```
+python3 combine_filling_results.py -f <file-one> <file-two> ... -s average -c "Filling type" -o "ftype_combined_final.csv"
+```
+Then the **filling level** (TODO: may remove this step we use only _vggish_):
+
+```
+python3 combine_filling_results.py -f <file-one> <file-two> ... -s average -c "Filling level [%]" -o "flevel_combined_final.csv"
+```
+
+After producing the result files as described, merge the submission form using the `main.py`
+
+```
+python3 main.py -ftype "ftype_combined_final.csv" -flevel "flevel_combined_final.csv" -capacity <filepath>
+```
+
+Usage:
+
+```
+main.py [-h] -t FTYPE [FTYPE ...] -l FLEVEL [FLEVEL ...] -c CAPACITY [CAPACITY ...] [-o OUTPUT]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -t FTYPE [FTYPE ...], --ftype FTYPE [FTYPE ...]
+                        Filling type csv file.
+  -l FLEVEL [FLEVEL ...], --flevel FLEVEL [FLEVEL ...]
+                        Filling level csv file.
+  -c CAPACITY [CAPACITY ...], --capacity CAPACITY [CAPACITY ...]
+                        Filling capacity csv file.
+  -o OUTPUT, --output OUTPUT
+                        Name of the output file, w/o extension.
+```
