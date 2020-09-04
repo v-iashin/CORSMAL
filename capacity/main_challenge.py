@@ -29,13 +29,13 @@ import utilities
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 #object_set = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
-object_set = ['12']
+object_set = ['10', '11', '12']
 
 training_set = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 testing_set = [10, 11, 12]
 
 modality_set = ['rgb', 'ir', 'depth']
-# modality_set = ['rgb']
+
 
 
 camera_id_set = ['1', '2', '3', '4']
