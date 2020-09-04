@@ -2,18 +2,18 @@ import cv2
 import shutil
 import os
 
-def extract_frames (object_set, modality_set):
+def extract_frames (object_set, modality_set, frame):
     for object in object_set:
         for modality in modality_set:
             if modality=='rgb' or modality=='ir':
-                extract_frames_rgb(object, modality)
+                extract_frames_rgb(object, modality, frame)
             elif modality == 'depth':
                 print('***************DEPTH **********************')
-                extract_frames_depth(object, modality)
+                extract_frames_depth(object, modality, frame)
 
-def extract_frames_rgb(object, modality):
+def extract_frames_rgb(object, modality, frame):
     videos_path = os.getcwd() + '/video_database/' + object + '/' + modality + '/'
-    frames_path = os.getcwd() + '/dataset/images/' + object + '/'
+    frames_path = os.getcwd() + '/dataset/images/' + object + '/' + frame + '/'
     if not os.path.exists(frames_path):
         os.mkdir(frames_path)
     for filename in os.listdir(videos_path):
@@ -26,7 +26,9 @@ def extract_frames_rgb(object, modality):
         print(filename + ' --- LOADING ')
         #To extract last frame
         # vidcap.set(1, vidcap.get(7) - 5)
-        vidcap.set(1, vidcap.get(7)-20)
+        # To extract 20th to last frame
+        if frame == '20':
+            vidcap.set(1, vidcap.get(7)-20)
         success, image = vidcap.read()
         if success:
             cv2.imwrite(save_image_path, image)
@@ -35,10 +37,10 @@ def extract_frames_rgb(object, modality):
 
 
 
-def extract_frames_depth(object, modality):
+def extract_frames_depth(object, modality, frame):
     #TODO to modify if possible to make it easier
     videos_path = os.getcwd() + '/video_database/' + object + '/' + modality + '/'
-    frames_path = os.getcwd() + '/dataset/images/' + object + '/'
+    frames_path = os.getcwd() + '/dataset/images/' + object + '/' + frame + '/'
     for root, first_level_dirs, first_level_files in os.walk(videos_path):
         for first_level_dir in first_level_dirs:
             first_level_joined_path = os.path.join(root, first_level_dir)
@@ -46,7 +48,10 @@ def extract_frames_depth(object, modality):
                 for second_level_dir in second_level_dirs:
                     second_level_joined_path = os.path.join(second_root, second_level_dir)
                     filename_list = os.listdir(second_level_joined_path)
-                    filename = filename_list[-20]
+                    if frame == '1':
+                        filename = filename_list[0]
+                    elif frame == '20':
+                        filename = filename_list[-20]
                     # filename = filename_list[-5]
                     # filename = max(filename_list)
                     # for filename in os.listdir(second_level_joined_path):

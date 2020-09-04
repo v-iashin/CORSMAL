@@ -50,12 +50,10 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 #object_set = ['10', '11', '12']
 object_set = ['10', '11', '12']
 
-training_set = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-testing_set = [10, 11, 12]
-
+frame_set = ['1', '20']
 modality_set = ['rgb', 'ir', 'depth']
 
-
+average_training_set = 734.94
 
 camera_id_set = ['1', '2', '3', '4']
 
@@ -75,24 +73,22 @@ class LoDE:
 
         #ADDED METHOD to extract the frames from the video
         print('Extract frames from bigger database')
-        utilities.extract_frames(object_set, modality_set)
+        #To uncomment TODO
+        # for frame in frame_set:
+        #     utilities.extract_frames(object_set, modality_set, frame)
 
-        f = open('{}/estimation.csv'.format(self.output_path), 'w', newline='')
-        #f.write('fileName\theight[mm]\twidth[mm]\tcapacity[mL]\n')
-        with f:
-            writer = csv.writer(f)
-            writer.writerow(['fileName','height[mm]','width[mm]','capacity[mL]'])
-            #f.write('fileName\theight[mm]\twidth[mm]\tcapacity[mL]\n')
-        f.close()
 
         # Load object detection model
         self.detectionModel = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True)
         self.detectionModel.eval()
         self.detectionModel.cuda()
 
-    def getObjectDimensions(self, file_id):
+    def getObjectDimensions(self, file_id, frame):
 
-        f = open('{}/estimation.csv'.format(self.output_path), 'a+', newline='')
+        if frame == '1':
+            f = open('{}/estimation_1.csv'.format(self.output_path), 'a+', newline='')
+        elif frame == '20':
+            f = open('{}/estimation_20.csv'.format(self.output_path), 'a+', newline='')
         try:
             centroid1, contour1 = getCentroid(self.c1['seg'])
             centroid2, contour2 = getCentroid(self.c2['seg'])
@@ -115,7 +111,7 @@ class LoDE:
 
             with f:
                 writer = csv.writer(f)
-                writer.writerow(['id{}_{}.png'.format(self.args.object,file_id), height , width, capacity])
+                writer.writerow(['id{}_{}.png'.format(self.args.object,file_id), height , width, capacity, frame])
                 # f.write('fileName\theight[mm]\twidth[mm]\tcapacity[mL]\n')
             f.close()
 
@@ -126,7 +122,7 @@ class LoDE:
             #                                                    file_id))
             with f:
                 writer = csv.writer(f)
-                writer.writerow(['id{}_{}.png'.format(self.args.object,file_id), '0' , '0', '734.94'])
+                writer.writerow(['id{}_{}.png'.format(self.args.object,file_id), '0' , '0', str(average_training_set), frame])
                 # f.write('fileName\theight[mm]\twidth[mm]\tcapacity[mL]\n')
             f.close()
 
@@ -188,7 +184,7 @@ class LoDE:
     def run(self):
 
         calibration_path = './dataset/calibration/{}'.format(args.object)
-        image_path = './dataset/images/{}'.format(args.object)
+        image_path = './dataset/images/{}/{}'.format(args.object, frame)
 
         # path exists?
         if not os.path.isdir(calibration_path):
@@ -205,7 +201,7 @@ class LoDE:
             self.readCalibration(calibration_path, fid)
             # Main loop
             self.readData(image_path, fid)
-            self.getObjectDimensions(fid)
+            self.getObjectDimensions(fid, frame)
 
 if __name__ == '__main__':
     # Parse arguments
@@ -221,6 +217,17 @@ if __name__ == '__main__':
 
     print('Executing...')
     lode = LoDE(args)
-    for args.object in object_set:
-        lode.run()
+    output_path = 'results'
+    for frame in frame_set:
+        if frame == '1':
+            f = open('{}/estimation_1.csv'.format(output_path), 'w', newline='')
+        elif frame == '20':
+            f = open('{}/estimation_1.csv'.format(output_path), 'w', newline='')
+        with f:
+            writer = csv.writer(f)
+            writer.writerow(['fileName','height[mm]','width[mm]','capacity[mL]', 'frame'])
+            #f.write('fileName\theight[mm]\twidth[mm]\tcapacity[mL]\n')
+        f.close()
+        for args.object in object_set:
+            lode.run()
     print('Completed!')
