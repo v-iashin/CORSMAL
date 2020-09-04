@@ -46,12 +46,12 @@ Please follow the instructions provided in individual sub-tasks folders.
 We combine the results of `vggish` and `pyAudioAnalysis` to predict the filling type. Use the following to run the combination. First **filling type**:
 
 ```
-python3 combine_filling_results.py -f <file-one> <file-two> ... -s average -c "Filling type" -o "ftype_combined_final.csv"
+python3 combine_filling_results.py -f <file-one> <file-two> ... --strategy average -c "Filling type" -o "ftype_combined_final.csv"
 ```
-Then the **filling level** (TODO: may remove this step we use only _vggish_):
+Then the **filling level** (NOTE: we use only _vggish_ as averaging does not improve, use "first" to choose a single file):
 
 ```
-python3 combine_filling_results.py -f <file-one> <file-two> ... -s average -c "Filling level [%]" -o "flevel_combined_final.csv"
+python3 combine_filling_results.py -f <file-one> <file-two> ... --strategy first -c "Filling level [%]" -o "flevel_combined_final.csv"
 ```
 
 After producing the result files as described, merge the submission form using the `main.py`
