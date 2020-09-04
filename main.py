@@ -34,42 +34,33 @@ def combine_flvl():
     return pd.Series([int(filling_2_value[cls]) for cls in flvl_combined.argmax(axis=1)])
 
 def capacity():
-    a = pd.read_csv('capacity/results/estimation_20thtolast_frame.csv')
-    return a['capacity[mL]']
+    a = pd.read_csv('./capacity/results/estimation_combined.csv')
+    return a['Container capacity [mL]']
 
+
+def estimate_fmass(submission):
+    Content_2_density = {
+        "Empty": 0.0,  # "Empty"
+        "Pasta": 0.41,  # "Pasta"
+        "Rice": 0.85,  # "Rice"
+        "Water": 1.00  # "Water"
+    }
+    fmass_col = []
+    for cont, seq, capacity, c_mass, ftype, flvl, fmass in submission.values:
+        fmass = Content_2_density[ftype] * flvl / 100 * capacity
+        fmass_col.append(fmass)
+
+    return pd.Series(fmass_col)
 
 
 if __name__ == "__main__":
-    # Take the file paths from arguments and fill the form
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('-s', '--sub_form', help='Submission form file.', default='./Submission_form.csv')
-    # parser.add_argument('-t', '--ftype', nargs='+', help='Filling type csv file.', required=True)
-    # parser.add_argument('-l', '--flevel', nargs='+', help='Filling level csv file.', required=True)
-    # parser.add_argument('-c', '--capacity', nargs='+', help='Filling capacity csv file.', required=True)
-    # parser.add_argument('-o', '--output', help='Name of the output file', default='./submission.csv')
-
-    # args = parser.parse_args()
-
-    # # get the empty submission form
-    # df_sub = pd.read_csv(args.sub_form)
-
-    # read files
-    # df_ftype = pd.read_csv(args.ftype)
-    # df_flevel = pd.read_csv(args.flevel)
-    # df_capacity = pd.read_csv(args.capacity)
-
-    # # add columns
-    # df_sub['Filling type'] = df_ftype['Filling type']
-    # df_sub['Filling level [%]'] = df_flevel['Filling level [%]']
-    # df_sub['Container capacity [mL]'] = df_capacity['Container capacity [mL]']
-
-    # df_sub.to_csv(args.output, index=False)
     submission = pd.read_csv('./Submission_form.csv')
     submission['Sequence'] = submission['Sequence'].apply(lambda x: f'{x:04d}')
-    print(submission)
-    print(submission.columns)
+
     submission['Filling type'] = combine_ftype()
     submission['Filling level [%]'] = combine_flvl()
     submission['Container capacity [mL]'] = capacity()
 
     submission.to_csv('./submission_before_final_form.csv', index=False)
+    submission['Filling mass [g]'] = estimate_fmass(submission)
+    submission.to_csv('./submission.csv', index=False)
