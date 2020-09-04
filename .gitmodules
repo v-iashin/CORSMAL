@@ -7,3 +7,6 @@
 [submodule "filling_level/r21d_rgb/video_features"]
 	path = filling_level/r21d_rgb/video_features
 	url = https://github.com/v-iashin/video_features.git
+[submodule "filling_type/CORSMAL-pyAudioAnalysis"]
+	path = filling_type/CORSMAL-pyAudioAnalysis
+	url = git@github.com:gokhansolak/CORSMAL-pyAudioAnalysis.git

@@ -34,7 +34,7 @@ Each folder in this repo correspond to a dedicated task. Filling level and types
     - `/vggish`
     - `README.md`
 - `/filling_type`
-    - `/CORSMAL-audio-only-filling-type-analysis`
+    - `/CORSMAL-pyAudioAnalysis`
     - `/r21d_rgb`
     - `/vggish`
     - `README.md`

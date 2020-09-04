@@ -11,7 +11,7 @@ def combine_ftype():
     vggish = pd.read_csv('./filling_type/vggish/predictions/200903163404/ftype_test_agg_vggish.csv')
 
     ftype_randomforest = pd.read_csv(
-        './filling_type/CORSMAL-audio-only-filling-type-analysis/results/ftype-randomforest-final.csv',
+        './filling_type/CORSMAL-pyAudioAnalysis/results/ftype-randomforest-final.csv',
     )
     ftype_randomforest.sort_values(['Object', 'Sequence']).reset_index(drop=True)
 
