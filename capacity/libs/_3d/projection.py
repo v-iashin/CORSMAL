@@ -1,18 +1,19 @@
-################################################################################## 
-#        Author: Ricardo Sanchez Matilla
-#         Email: ricardo.sanchezmatilla@qmul.ac.uk
-#  Created Date: 2020/02/13
-# Modified Date: 2020/02/28
-
+##################################################################################
+# This work is an extension of LoDE code developed by Ricardo Sanchez Matilla
+# (Email: ricardo.sanchezmatilla@qmul.ac.uk)
+#        Author: Francesca Palermo
+#         Email: f.palermo@qmul.ac.uk
+#         Date: 2020/09/03
 # Centre for Intelligent Sensing, Queen Mary University of London, UK
-# 
-################################################################################## 
+#
+##################################################################################
 # License
 # This work is licensed under the Creative Commons Attribution-NonCommercial 4.0
-# International License. To view a copy of this license, visit 
-# http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to 
+# International License. To view a copy of this license, visit
+# http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to
 # Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 ##################################################################################
+
 #
 # OpenCV
 import cv2

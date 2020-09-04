@@ -1,3 +1,20 @@
+##################################################################################
+# This work is an extension of LoDE code developed by Ricardo Sanchez Matilla
+# (Email: ricardo.sanchezmatilla@qmul.ac.uk)
+#        Author: Francesca Palermo
+#         Email: f.palermo@qmul.ac.uk
+#         Date: 2020/09/03
+# Centre for Intelligent Sensing, Queen Mary University of London, UK
+#
+##################################################################################
+# License
+# This work is licensed under the Creative Commons Attribution-NonCommercial 4.0
+# International License. To view a copy of this license, visit
+# http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to
+# Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+##################################################################################
+
+
 # System libs
 import glob
 import sys
@@ -16,6 +33,7 @@ import os
 
 import pickle
 import re
+import csv
 
 from tqdm import tqdm
 
@@ -29,6 +47,7 @@ import utilities
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 #object_set = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+#object_set = ['10', '11', '12']
 object_set = ['10', '11', '12']
 
 training_set = [1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -58,8 +77,12 @@ class LoDE:
         print('Extract frames from bigger database')
         utilities.extract_frames(object_set, modality_set)
 
-        f = open('{}/estimation.txt'.format(self.output_path), 'w')
-        f.write('fileName\theight[mm]\twidth[mm]\tcapacity[mL]\n')
+        f = open('{}/estimation.csv'.format(self.output_path), 'w', newline='')
+        #f.write('fileName\theight[mm]\twidth[mm]\tcapacity[mL]\n')
+        with f:
+            writer = csv.writer(f)
+            writer.writerow(['fileName','height[mm]','width[mm]','capacity[mL]'])
+            #f.write('fileName\theight[mm]\twidth[mm]\tcapacity[mL]\n')
         f.close()
 
         # Load object detection model
@@ -69,7 +92,7 @@ class LoDE:
 
     def getObjectDimensions(self, file_id):
 
-        f = open('{}/estimation.txt'.format(self.output_path), 'a+')
+        f = open('{}/estimation.csv'.format(self.output_path), 'a+', newline='')
         try:
             centroid1, contour1 = getCentroid(self.c1['seg'])
             centroid2, contour2 = getCentroid(self.c2['seg'])
@@ -83,18 +106,29 @@ class LoDE:
             cv2.imwrite('{}/id{}_{}.png'.format(self.output_path, args.object, file_id), visualization)
 
 
-            f.write(
-                'id{}_{}.png\t{:.2f}\t{:.2f}\t{:.2f}\n'.format(self.args.object,
-                                                       file_id,
-                                                          height,
-                                                          width,
-                                                          capacity))
+            # f.write(
+            #     'id{}_{}.png\t{:.2f}\t{:.2f}\t{:.2f}\n'.format(self.args.object,
+            #                                            file_id,
+            #                                               height,
+            #                                               width,
+            #                                               capacity))
+
+            with f:
+                writer = csv.writer(f)
+                writer.writerow(['id{}_{}.png'.format(self.args.object,file_id), height , width, capacity])
+                # f.write('fileName\theight[mm]\twidth[mm]\tcapacity[mL]\n')
+            f.close()
 
             print('{}/id{}_{} ---- DONE'.format(self.output_path, args.object, file_id))
         except:
-            f.write(
-                'id{}_{}.png\t0\t0\t0\n'.format(self.args.object,
-                                                               file_id))
+            # f.write(
+            #     'id{}_{}.png\t0\t0\t0\n'.format(self.args.object,
+            #                                                    file_id))
+            with f:
+                writer = csv.writer(f)
+                writer.writerow(['id{}_{}.png'.format(self.args.object,file_id), '0' , '0', '0'])
+                # f.write('fileName\theight[mm]\twidth[mm]\tcapacity[mL]\n')
+            f.close()
 
             print('Error measuring id{}_{}'.format(self.args.object, file_id))
         f.close()
