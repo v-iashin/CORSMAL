@@ -42,3 +42,26 @@ Each folder in this repo correspond to a dedicated task. Filling level and types
 
 ## How to run
 Please follow the instructions provided in individual sub-tasks folders.
+
+After producing the result files as described, merge the submission form using the `main.py`
+
+```
+python3 main.py -ftype <filepath> -flevel <filepath> -capacity <filepath>
+```
+
+Usage:
+
+```
+main.py [-h] -t FTYPE [FTYPE ...] -l FLEVEL [FLEVEL ...] -c CAPACITY [CAPACITY ...] [-o OUTPUT]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -t FTYPE [FTYPE ...], --ftype FTYPE [FTYPE ...]
+                        Filling type csv file.
+  -l FLEVEL [FLEVEL ...], --flevel FLEVEL [FLEVEL ...]
+                        Filling level csv file.
+  -c CAPACITY [CAPACITY ...], --capacity CAPACITY [CAPACITY ...]
+                        Filling capacity csv file.
+  -o OUTPUT, --output OUTPUT
+                        Name of the output file, w/o extension.
+```
