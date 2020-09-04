@@ -17,13 +17,12 @@ The main task is to estimate the  overall  filling  mass  estimation. This quant
 - Filling level classification (0, 50, 90%)
 
 ## Dataset
-[Dataset](http://corsmal.eecs.qmul.ac.uk/containers_manip.html) (Audio, RGB, IMU, Depth, IR)
+[CORSMAL dataset](http://corsmal.eecs.qmul.ac.uk/containers_manip.html) (Audio, RGB, IMU, Depth, IR)
 
 It has 12 containers (4 glasses, cups, and boxes; 9 train + 3 test).
 
 ## Evaluation
 We used 3-Fold validation where possible, preserving the box/glass/cup ratio as in test set.
-
 
 ## Organization or this repo
 
