@@ -126,7 +126,7 @@ class LoDE:
             #                                                    file_id))
             with f:
                 writer = csv.writer(f)
-                writer.writerow(['id{}_{}.png'.format(self.args.object,file_id), '0' , '0', '0'])
+                writer.writerow(['id{}_{}.png'.format(self.args.object,file_id), '0' , '0', '749'])
                 # f.write('fileName\theight[mm]\twidth[mm]\tcapacity[mL]\n')
             f.close()
 
