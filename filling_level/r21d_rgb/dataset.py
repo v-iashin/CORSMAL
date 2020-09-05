@@ -116,7 +116,7 @@ class RGBDataset(torch.utils.data.Dataset):
 
 
 if __name__ == "__main__":
-    DATA_ROOT = '/home/nvme/vladimir/corsmal/features'
+    DATA_ROOT = './r21d_rgb_features'
 
     train = RGBDataset(DATA_ROOT, [1, 2, 3, 4, 5, 6], 'train')
     valid = RGBDataset(DATA_ROOT, [7, 8, 9], 'valid')

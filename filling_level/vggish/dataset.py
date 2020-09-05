@@ -103,7 +103,7 @@ class AudioDataset(torch.utils.data.Dataset):
 
 
 if __name__ == "__main__":
-    DATA_ROOT = '/home/nvme/vladimir/corsmal/features'
+    DATA_ROOT = './vggish_features'
 
     train = AudioDataset(DATA_ROOT, [1, 2, 3, 4, 5, 6], 'train')
     valid = AudioDataset(DATA_ROOT, [7, 8, 9], 'valid')

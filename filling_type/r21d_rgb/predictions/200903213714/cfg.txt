@@ -3,8 +3,8 @@ task: ftype
 output_dim: 4
 model_type: GRU
 bi_dir: False
-device: cuda:1
-data_root: /home/nvme/vladimir/corsmal/features
+device: cuda:0
+data_root: ../../filling_level/r21d_rgb/r21d_rgb_features
 drop_p: 0.0
 batch_size: 64
 input_dim: 512

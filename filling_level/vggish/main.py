@@ -21,7 +21,7 @@ def get_cmd_args() -> argparse.Namespace:
     parser.add_argument('--model_type', default='GRU')
     parser.add_argument('--bi_dir', dest='bi_dir', action='store_true', default=False)
     parser.add_argument('--device', default='cuda:0')
-    parser.add_argument('--data_root', default='/home/nvme/vladimir/corsmal/features')
+    parser.add_argument('--data_root', default='./vggish_features')
     parser.add_argument('--batch_size', default=64, type=int)
     parser.add_argument('--input_dim', default=128, type=int)
     parser.add_argument('--hidden_dim', default=256, type=int)

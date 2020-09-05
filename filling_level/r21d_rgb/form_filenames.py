@@ -2,7 +2,6 @@ import argparse
 from glob import glob
 import os
 
-
 def make_file_with_paths(path_pattern, save_path):
     file_paths = glob(path_pattern)
     with open(save_path, 'w') as outf:
@@ -20,5 +19,5 @@ if __name__ == "__main__":
     for cont in range(1, 12+1):
         # it will create ./filepaths dir (already present in the repo) with file paths to each container
         make_file_with_paths(
-            os.path.join(args.data_root, str(cont), 'audio/*.wav'), f'./filepaths/{cont}_audio_file_paths.txt'
+            os.path.join(args.data_root, str(cont), 'rgb/*.mp4'), f'./filepaths/{cont}_rgb_file_paths.txt'
         )

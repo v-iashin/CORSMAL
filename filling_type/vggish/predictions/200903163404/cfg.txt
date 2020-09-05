@@ -4,7 +4,7 @@ output_dim: 4
 model_type: GRU
 bi_dir: False
 device: cuda:0
-data_root: /home/nvme/vladimir/corsmal/features
+data_root: ../../filling_level/vggish/vggish_features
 batch_size: 64
 input_dim: 128
 hidden_dim: 512

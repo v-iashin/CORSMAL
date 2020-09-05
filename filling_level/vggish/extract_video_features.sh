@@ -2,6 +2,9 @@
 # you may want to switch it to `anaconda3` if you install anaconda instead of miniconda
 source ~/miniconda3/etc/profile.d/conda.sh
 
+# path to corsmal dataset without trailing slash (`/`) e.g. folder should have 1/ 2/ 3/ ... 12/ folders
+DATA_ROOT="/home/nvme/vladimir/corsmal" # ---- NO TRAILING '/' i.e. not '.....mal/'
+
 # making sure we are not in 'base' or any other
 conda deactivate
 conda deactivate
@@ -11,7 +14,7 @@ conda deactivate
 conda activate vggish
 
 # form paths for feature extraction (will be saved to ./filepaths)
-python ./form_filenames.py --data_root /home/nvme/vladimir/corsmal
+python ./form_filenames.py --data_root $DATA_ROOT
 
 # moving to `./video_features` folder
 cd ./video_features

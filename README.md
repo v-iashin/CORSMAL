@@ -40,6 +40,11 @@ Each folder in this repo correspond to a dedicated task. Filling level and types
     - `README.md`
 
 ## How to run
+Clone the repo. Mind the `--recursive` flag (if you forgot the flag in the first place, just run `git submodule update --init`)
+```
+git clone --recursive https://github.com/v-iashin/CORSMAL.git
+```
+
 Please follow the instructions provided in individual sub-tasks folders to train and obtain the preds.
 
 Then, run `main.py` to get the final results (mind the filenames you would like to use).
