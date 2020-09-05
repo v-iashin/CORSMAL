@@ -1,3 +1,4 @@
+import argparse
 from glob import glob
 import os
 
@@ -9,11 +10,14 @@ def make_file_with_paths(path_pattern, save_path):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser('Extract features')
+    parser.add_argument('--data_root', help='Path to CORSMAL dataset (the folder should contain: 1/ 2/ ...')
+    args = parser.parse_args()
+
     os.makedirs('filepaths', exist_ok=True)
-    for i in range(1, 12+1):
+
+    for cont_id in range(1, 12+1):
+        # it will create ./filepaths dir (already present in the repo) with file paths to each container
         make_file_with_paths(
-            f'/home/nvme/vladimir/corsmal/{i}/audio/*.wav', f'./filepaths/{i}_audio_file_paths.txt'
-        )
-        make_file_with_paths(
-            f'/home/nvme/vladimir/corsmal/{i}/rgb/*.mp4', f'./filepaths/{i}_rgb_file_paths.txt'
+            os.path.join(args.data_root, cont_id, 'rgb/*.mp4'), f'./filepaths/{cont_id}_rgb_file_paths.txt'
         )
