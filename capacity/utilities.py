@@ -1,6 +1,7 @@
 import cv2
 import shutil
 import os
+import pandas as pd
 
 def extract_frames (object_set, modality_set, frame):
     for object in object_set:
@@ -63,6 +64,34 @@ def extract_frames_depth(object, modality, frame):
                         continue
                     shutil.copyfile(original_path, to_move_path)
                     print(to_move_path + ' --- COPIED')
+
+
+def combine_results_csv(average_training_set):
+    path_to_load = 'results/'
+    csv_1frame_path = 'estimation_1.csv'
+    csv_20frame_path = 'estimation_20.csv'
+    combined_file_path = 'estimation_combination.csv'
+
+    data_1frame = pd.read_csv(path_to_load + csv_1frame_path)
+    data_20frame = pd.read_csv(path_to_load + csv_20frame_path)
+    combined_file = pd.DataFrame(data=data_1frame[['fileName', 'capacity[mL]']].values, columns=['fileName', 'capacity[mL]'])
+
+
+    for index, row in data_1frame.iterrows():
+        if(row['capacity[mL]'] != average_training_set) and data_20frame['capacity[mL]'][index] != average_training_set:
+            combined_file['capacity[mL]'][index] = (row['capacity[mL]'] + data_20frame['capacity[mL]'][index])/2
+        elif(row['capacity[mL]'] != average_training_set) and data_20frame['capacity[mL]'][index] == average_training_set:
+            combined_file['capacity[mL]'][index] = row['capacity[mL]']
+        elif(row['capacity[mL]'] == average_training_set) and data_20frame['capacity[mL]'][index] != average_training_set:
+            combined_file['capacity[mL]'][index] =  data_20frame['capacity[mL]'][index]
+        elif(row['capacity[mL]'] == average_training_set) and data_20frame['capacity[mL]'][index] == average_training_set:
+            combined_file['capacity[mL]'][index] = row['capacity[mL]']
+
+    combined_file.to_csv(path_to_load + combined_file_path)
+    print('test')
+
+
+
 
 
 

@@ -46,10 +46,9 @@ from libs.detection.detection import imageSegmentation
 import utilities
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-#object_set = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
-#object_set = ['10', '11', '12']
 object_set = ['10', '11', '12']
 
+#TODO bring back to the original
 frame_set = ['1', '20']
 modality_set = ['rgb', 'ir', 'depth']
 
@@ -73,10 +72,8 @@ class LoDE:
 
         #ADDED METHOD to extract the frames from the video
         print('Extract frames from bigger database')
-        #To uncomment TODO
-        # for frame in frame_set:
-        #     utilities.extract_frames(object_set, modality_set, frame)
-
+        for frame in frame_set:
+            utilities.extract_frames(object_set, modality_set, frame)
 
         # Load object detection model
         self.detectionModel = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True)
@@ -99,31 +96,18 @@ class LoDE:
             centroid = centroid[:, :-1].reshape(-1)
 
             height, width, visualization, capacity = getObjectDimensions(self.c1, self.c2, centroid, self.args.draw)
-            cv2.imwrite('{}/id{}_{}.png'.format(self.output_path, args.object, file_id), visualization)
-
-
-            # f.write(
-            #     'id{}_{}.png\t{:.2f}\t{:.2f}\t{:.2f}\n'.format(self.args.object,
-            #                                            file_id,
-            #                                               height,
-            #                                               width,
-            #                                               capacity))
+            cv2.imwrite('{}/id{}_{}_{}.png'.format(self.output_path, args.object, file_id, frame), visualization)
 
             with f:
                 writer = csv.writer(f)
                 writer.writerow(['id{}_{}.png'.format(self.args.object,file_id), height , width, capacity, frame])
-                # f.write('fileName\theight[mm]\twidth[mm]\tcapacity[mL]\n')
             f.close()
 
             print('{}/id{}_{} ---- DONE'.format(self.output_path, args.object, file_id))
         except:
-            # f.write(
-            #     'id{}_{}.png\t0\t0\t0\n'.format(self.args.object,
-            #                                                    file_id))
             with f:
                 writer = csv.writer(f)
                 writer.writerow(['id{}_{}.png'.format(self.args.object,file_id), '0' , '0', str(average_training_set), frame])
-                # f.write('fileName\theight[mm]\twidth[mm]\tcapacity[mL]\n')
             f.close()
 
             print('Error measuring id{}_{}'.format(self.args.object, file_id))
@@ -230,4 +214,5 @@ if __name__ == '__main__':
         f.close()
         for args.object in object_set:
             lode.run()
+    utilities.combine_results_csv(average_training_set)
     print('Completed!')
