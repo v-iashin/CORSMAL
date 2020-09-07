@@ -5,10 +5,10 @@ This is the code for the challenging 3 days competition among participants of th
 The CORSMAL challenge  focuses on the estimation  of the weight of containers which depends  on the presence  of a filling and  its  amount  and type,  in addition  to the  container  capacity.  Participants  will determine  the  physical  properties  of  a  container  while  it  is  manipulated  by  a  human, when both containers  and fillings  are not known a priori.
 
 ## Team
-- Gokhan Solak (g.solak@qmul.ac.uk)
-- Francesca Palermo (f.palermo@qmul.ac.uk)
+- Gokhan Solak ([LinkedIn](https://www.linkedin.com/in/gkhnsolak/), g.solak@qmul.ac.uk)
+- Francesca Palermo ([LinkedIn](https://www.linkedin.com/in/francesca-palermo-a9107a40/), f.palermo@qmul.ac.uk)
 - Claudio Coppola (c.coppola@qmul.ac.uk)
-- Vladimir Iashin (vladimir.iashin@tuni.fi)
+- Vladimir Iashin ([LinkedIn](https://www.linkedin.com/in/vladimir-iashin/), vladimir.iashin@tuni.fi)
 
 ## Task
 The main task is to estimate the  overall  filling  mass  estimation. This quantity can be estimated by solving three sub-tasks:
@@ -22,7 +22,7 @@ The main task is to estimate the  overall  filling  mass  estimation. This quant
 It has 12 containers (4 glasses, cups, and boxes; 9 train + 3 test).
 
 ## Evaluation
-We used 3-Fold validation where possible, preserving the box/glass/cup ratio as in test set.
+We used 3-Fold validation where possible, preserving the box/glass/cup ratio as in the test set.
 
 ## Organization or this repo
 
@@ -40,11 +40,7 @@ Each folder in this repo correspond to a dedicated task. Filling level and types
     - `README.md`
 
 ## How to run
-Clone the repo. Mind the `--recursive` flag (if you forgot the flag in the first place, just run `git submodule update --init`)
-```
-git clone --recursive https://github.com/v-iashin/CORSMAL.git
-```
+1. Clone the repo: `git clone --recursive https://github.com/v-iashin/CORSMAL.git`. Mind the `--recursive` flag (if you forgot the flag in the first place, just run `git submodule update --init`);
+2. Run `./main.py` (requires `pandas` though) it will take the predictions from each subtask folder and form the final submission file.
 
-Please follow the instructions provided in individual sub-tasks folders to train and obtain the preds.
-
-Then, run `main.py` to get the final results (mind the filenames you would like to use).
+Please follow the instructions provided in individual sub-tasks folders to train and obtain the preds. Each folder has its own environment, you will need to install those.

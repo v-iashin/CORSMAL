@@ -233,13 +233,13 @@ def experiment(cfg, fold):
     # make predictions
     predict(
         cfg, model_c1, model_c2, model_c3, model_c4, dataloaders['train'],
-        f'./predictions/{cfg.init_time}/{cfg.task}_train_{"_".join([str(i) for i in fold["train"]])}_vggish.csv')
+        f'./predictions/{cfg.init_time}/{cfg.task}_train_{"_".join([str(i) for i in fold["train"]])}_r21d_rgb.csv')
     predict(
         cfg, model_c1, model_c2, model_c3, model_c4, dataloaders['valid'],
-        f'./predictions/{cfg.init_time}/{cfg.task}_valid_{"_".join([str(i) for i in fold["valid"]])}_vggish.csv')
+        f'./predictions/{cfg.init_time}/{cfg.task}_valid_{"_".join([str(i) for i in fold["valid"]])}_r21d_rgb.csv')
     test_predictions = predict(
         cfg, model_c1, model_c2, model_c3, model_c4, dataloaders['test'],
-        f'./predictions/{cfg.init_time}/{cfg.task}_test_trained_on_{"_".join([str(i) for i in fold["train"]])}_vggish.csv')
+        f'./predictions/{cfg.init_time}/{cfg.task}_test_trained_on_{"_".join([str(i) for i in fold["train"]])}_r21d_rgb.csv')
 
     return best_metric, test_predictions
 
@@ -276,9 +276,9 @@ def predict(cfg, model_c1, model_c2, model_c3, model_c4, loader, save_path):
             softmaxed = torch.nn.functional.softmax(outputs, dim=-1)
 
         for i in range(len(batch['paths'])):
-            sequence = pathlib.Path(batch['paths'][i]).stem.replace('_audio', '')
+            sequence = pathlib.Path(batch['paths'][i]).stem
             predictions['Object'].append(batch['containers'][i])
-            predictions['Sequence'].append(sequence.replace('_vggish', ''))
+            predictions['Sequence'].append(sequence)
             for c in range(cfg.output_dim):
                 predictions[f'{cfg.task}_prob_{c}'].append(softmaxed[i, c].item())
 
@@ -311,21 +311,33 @@ def run_kfold(cfg):
         aggregated_dataset[column] = np.mean(fold_columns, axis=0)
 
     aggregated_dataset.to_csv(
-        os.path.join(save_results, f'{cfg.task}_test_agg_vggish.csv'),
+        os.path.join(save_results, f'{cfg.task}_test_agg_r21d_rgb.csv'),
         index=False
     )
 
 
 if __name__ == "__main__":
+    # Reproduce the best experiment
+    exp_name = 200903214601
     cfg = Config()
-    cfg.load_from(cmd_args=get_cmd_args())
-    run_kfold(cfg)
+    cfg.load_from(path=f'./predictions/{exp_name}/cfg.txt')
+    # replacing the time with the old_time + current_time such that there is no collision
+    cfg.init_time = f'{cfg.init_time}_{strftime("%y%m%d%H%M%S", localtime())}'
+    run_kfold(cfg)  # Expected average of Best Metrics on Each Valid Set: 0.747354 @ 200903214601
 
-    # # Reproduce the best experiment
-    # # Average of Best Metrics on Each Valid Set: 0.755171,
-    # exp_name = 200903132516
-
+    # Experiment with other parameters
     # cfg = Config()
-    # cfg.load_from(path=f'./predictions/{exp_name}/cfg.txt')
-    # print(type(cfg.drop_p))
+    # cfg.assign_variable('task', 'flvl')
+    # cfg.assign_variable('output_dim', 3)
+    # cfg.assign_variable('model_type', 'GRU')
+    # cfg.assign_variable('bi_dir', False)
+    # cfg.assign_variable('device', 'cuda:0')
+    # cfg.assign_variable('data_root', './r21d_rgb_features')
+    # cfg.assign_variable('drop_p', 0.0) # results will be irreproducible
+    # cfg.assign_variable('batch_size', 64)
+    # cfg.assign_variable('input_dim', 512)
+    # cfg.assign_variable('hidden_dim', 512)
+    # cfg.assign_variable('n_layers', 3)
+    # cfg.assign_variable('num_epochs', 30)
+    # cfg.assign_variable('seed', 1337)
     # run_kfold(cfg)

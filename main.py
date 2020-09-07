@@ -1,5 +1,4 @@
 import pandas as pd
-import argparse
 
 def combine_ftype():
     Content_2_index = {
@@ -26,11 +25,23 @@ def combine_ftype():
 
 def combine_flvl():
     filling_2_value = {0: 0, 1: 50, 2: 90}
-    flvl_vggish = pd.read_csv('filling_level/vggish/predictions/200903162117/flvl_test_agg_vggish.csv')
-    print(flvl_vggish)
-    flvl_vggish = flvl_vggish[['flvl_prob_0', 'flvl_prob_1', 'flvl_prob_2']]
-    flvl_combined = flvl_vggish.values
-    print(flvl_vggish)
+    cols_with_probs_1 = ['flvl_prob_0', 'flvl_prob_1', 'flvl_prob_2']
+
+    flvl_vggish = pd.read_csv('./filling_level/vggish/predictions/200903162117/flvl_test_agg_vggish.csv')
+    flvl_r21d = pd.read_csv('./filling_level/r21d_rgb/predictions/200903214601/flvl_test_agg_r21d_rgb.csv')
+
+    flvl_vggish = flvl_vggish[cols_with_probs_1]
+    flvl_r21d = flvl_r21d[cols_with_probs_1]
+
+    flvl_combined = (flvl_vggish.values + flvl_r21d.values) / 2
+
+    # we also observed that adding pyAudioAnalysis' random forest predictions, improves valid performance
+    # cols_with_probs_2 = ['Filling level [%] prob0', 'Filling level [%] prob1', 'Filling level [%] prob2']
+    # flvl_rf = pd.read_csv('./filling_type/CORSMAL-pyAudioAnalysis/results/flevel-randomforest-final.csv')
+    # flvl_rf = flvl_rf.sort_values(['Object', 'Sequence']).reset_index(drop=True)
+    # flvl_rf = flvl_rf[cols_with_probs_2]
+    # flvl_combined = (flvl_vggish.values + flvl_r21d.values + flvl_rf.values) / 3
+
     return pd.Series([int(filling_2_value[cls]) for cls in flvl_combined.argmax(axis=1)])
 
 def capacity():
@@ -61,6 +72,6 @@ if __name__ == "__main__":
     submission['Filling level [%]'] = combine_flvl()
     submission['Container capacity [mL]'] = capacity()
 
-    submission.to_csv('./submission_before_final_form.csv', index=False)
+    # submission.to_csv('./submission_before_final_form.csv', index=False)
     submission['Filling mass [g]'] = estimate_fmass(submission)
     submission.to_csv('./submission.csv', index=False)
