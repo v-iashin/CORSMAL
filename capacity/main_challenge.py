@@ -13,8 +13,6 @@
 # http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to
 # Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 ##################################################################################
-
-
 # System libs
 import glob
 import sys
@@ -45,27 +43,17 @@ from libs.detection.detection import imageSegmentation
 # Additional Scripts
 import utilities
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
 object_set = ['10', '11', '12']
-
-#TODO bring back to the original
 frame_set = ['1', '20']
 modality_set = ['rgb', 'ir', 'depth']
-
 average_training_set = 734.94
-
-camera_id_set = ['1', '2', '3', '4']
 
 class LoDE:
     def __init__(self, args):
-
         self.args = args
-
         self.c1 = dict.fromkeys(['rgb', 'seg', 'intrinsic', 'extrinsic'])
         self.c2 = dict.fromkeys(['rgb', 'seg', 'intrinsic', 'extrinsic'])
-
         self.dataset_path = 'dataset'
-
         self.output_path = 'results'
         if not os.path.exists(self.output_path):
             os.makedirs(self.output_path)
@@ -206,7 +194,7 @@ if __name__ == '__main__':
         if frame == '1':
             f = open('{}/estimation_1.csv'.format(output_path), 'w', newline='')
         elif frame == '20':
-            f = open('{}/estimation_1.csv'.format(output_path), 'w', newline='')
+            f = open('{}/estimation_20.csv'.format(output_path), 'w', newline='')
         with f:
             writer = csv.writer(f)
             writer.writerow(['fileName','height[mm]','width[mm]','capacity[mL]', 'frame'])
