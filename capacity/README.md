@@ -51,7 +51,7 @@ The code will extract frames from the videos presents in __video_database__ and 
 # Run on the Test Set
 Run LoDE on the whole testing set
 ```bash
-python main_challenge.py
+python main.py
 ```
 
 ## Output
