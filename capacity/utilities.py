@@ -88,7 +88,6 @@ def combine_results_csv(average_training_set):
             combined_file['capacity[mL]'][index] = row['capacity[mL]']
 
     combined_file.to_csv(path_to_load + combined_file_path)
-    print('test')
 
 
 
