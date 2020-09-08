@@ -45,8 +45,8 @@ def combine_flvl():
     return pd.Series([int(filling_2_value[cls]) for cls in flvl_combined.argmax(axis=1)])
 
 def capacity():
-    a = pd.read_csv('./capacity/results/estimation_combined.csv')
-    return a['Container capacity [mL]']
+    a = pd.read_csv('./capacity/results/estimation_combination.csv')
+    return a['capacity[mL]']
 
 
 def estimate_fmass(submission):
