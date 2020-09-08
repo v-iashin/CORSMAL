@@ -37,7 +37,7 @@ def combine_flvl():
 
     # we also observed that adding pyAudioAnalysis' random forest predictions, improves valid performance
     # cols_with_probs_2 = ['Filling level [%] prob0', 'Filling level [%] prob1', 'Filling level [%] prob2']
-    # flvl_rf = pd.read_csv('./filling_type/CORSMAL-pyAudioAnalysis/results/flevel-randomforest-final.csv')
+    # flvl_rf = pd.read_csv('./filling_level/CORSMAL-pyAudioAnalysis/results/flevel-randomforest-final.csv')
     # flvl_rf = flvl_rf.sort_values(['Object', 'Sequence']).reset_index(drop=True)
     # flvl_rf = flvl_rf[cols_with_probs_2]
     # flvl_combined = (flvl_vggish.values + flvl_r21d.values + flvl_rf.values) / 3

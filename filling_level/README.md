@@ -1,3 +1,9 @@
+## pyAudioAnalysis
+
+Installation and run instructions can be found in `./CORSMAL-pyAudioAnalysis/README.md`. Run the lines corresponding to `fu` (filling level).
+
+Result: accuracy (avg accuracy across folds): `0.70`
+
 ## VGGish
 
 1. Run `bash ./extract.sh` to extract Vggish features using `./video_features` (follow the guidelines in the `README.md` to install the env and download the vggish model checkpoint). Alternativelly, use `./vggish_features` folder. Note, when you will extract the features the hash of some features can be different to the ones in the repo due to numerical errors (average difference is < 1e-6).
