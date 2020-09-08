@@ -75,3 +75,4 @@ if __name__ == "__main__":
     # submission.to_csv('./submission_before_final_form.csv', index=False)
     submission['Filling mass [g]'] = estimate_fmass(submission)
     submission.to_csv('./submission.csv', index=False)
+    print('Formed predictions in ./submission.csv')
