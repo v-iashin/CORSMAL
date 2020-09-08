@@ -14,6 +14,7 @@ In addition, the automatic frame extraction from the complete videos database ha
 [CORSMAL Containers Manipulation Dataset](http://corsmal.eecs.qmul.ac.uk/containers_manip.html)
 
 ## Tested on
+* Windows 10
 * Python 3.6.8
 * OpenCV 4.1.0
 * PyTorch 1.4.0
@@ -29,10 +30,10 @@ Download or clone the repository.
 git clone 
 ```
 
-Create the conda environment from file ([more info on how to install miniconda](https://docs.conda.io/en/latest/miniconda.html))
+If you use Windows, create the conda environment from file ([more info on how to install miniconda](https://docs.conda.io/en/latest/miniconda.html))
 
 ```
-conda env create --file LoDE.yml
+conda env create --file LoDE_windows.yml
 source activate LoDE
 ```
 
@@ -51,7 +52,7 @@ The code will extract frames from the videos presents in __video_database__ and 
 
 Run LoDE on the whole testing set
 ```
-python main.py 
+python main_challenge.py 
 ```
 
 ## Output

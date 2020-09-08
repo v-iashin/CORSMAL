@@ -36,6 +36,7 @@ dependencies:
   - olefile=0.46=py_0
   - opencv=4.4.0=py36_2
   - openssl=1.1.1g=he774522_1
+  - pandas=1.1.1=py36h003fed8_0
   - pillow=7.2.0=py36he4e95fe_1
   - pip=20.2.2=py_0
   - py-opencv=4.4.0=py36h95af2a2_2
@@ -46,6 +47,7 @@ dependencies:
   - python-dateutil=2.8.1=py_0
   - python_abi=3.6=1_cp36m
   - pytorch=1.4.0=py3.6_cuda101_cudnn7_0
+  - pytz=2020.1=pyh9f0ad1d_0
   - qt=5.12.6=hb2cf2c5_0
   - scipy=1.5.2=py36h9439919_0
   - setuptools=49.6.0=py36h9f0ad1d_0
