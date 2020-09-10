@@ -21,7 +21,8 @@ def combine_ftype():
 
     ftype_combined = (random_forest_preds.values + vggish_preds.values) / 2
 
-    return pd.Series([Content_2_index[cls] for cls in ftype_combined.argmax(axis=1)])
+    # return pd.Series([Content_2_index[cls] for cls in ftype_combined.argmax(axis=1)])
+    return pd.Series([cls for cls in ftype_combined.argmax(axis=1)])
 
 def combine_flvl():
     filling_2_value = {0: 0, 1: 50, 2: 90}
@@ -46,16 +47,22 @@ def combine_flvl():
     return pd.Series([int(filling_2_value[cls]) for cls in flvl_combined.argmax(axis=1)])
 
 def capacity():
-    a = pd.read_csv('./capacity/results/estimation_combination.csv')
+    # a = pd.read_csv('./capacity/results/estimation_combination.csv')
+    # a = pd.read_csv('./capacity/results/estimation_combination_with_0.csv')
+    a = pd.read_csv('./capacity/results/estimation_combination_with_1.csv')
     return a['capacity[mL]']
 
 
 def estimate_fmass(submission):
     Content_2_density = {
         "Empty": 0.0,  # "Empty"
+        0: 0.0,  # "Empty"
         "Pasta": 0.41,  # "Pasta"
+        1: 0.41,  # "Pasta"
         "Rice": 0.85,  # "Rice"
-        "Water": 1.00  # "Water"
+        2: 0.85,  # "Rice"
+        "Water": 1.00,  # "Water"
+        3: 1.00,  # "Water"
     }
     fmass_col = []
     for cont, seq, capacity, c_mass, ftype, flvl, fmass in submission.values:
@@ -73,7 +80,6 @@ if __name__ == "__main__":
     submission['Filling level [%]'] = combine_flvl()
     submission['Container capacity [mL]'] = capacity()
 
-    # submission.to_csv('./submission_before_final_form.csv', index=False)
-    submission['Filling mass [g]'] = estimate_fmass(submission)
+    # submission['Filling mass [g]'] = estimate_fmass(submission)
     submission.to_csv('./submission.csv', index=False)
     print('Formed predictions in ./submission.csv')
