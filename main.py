@@ -12,7 +12,7 @@ def combine_ftype():
     ftype_randomforest = pd.read_csv(
         './filling_type/CORSMAL-pyAudioAnalysis/results/ftype-randomforest-final.csv',
     )
-    ftype_randomforest.sort_values(['Object', 'Sequence']).reset_index(drop=True)
+    ftype_randomforest = ftype_randomforest.sort_values(['Object', 'Sequence']).reset_index(drop=True)
 
     random_forest_preds = ftype_randomforest[[
         'Filling type prob0', 'Filling type prob1', 'Filling type prob2', 'Filling type prob3'
@@ -28,12 +28,13 @@ def combine_flvl():
     cols_with_probs_1 = ['flvl_prob_0', 'flvl_prob_1', 'flvl_prob_2']
 
     flvl_vggish = pd.read_csv('./filling_level/vggish/predictions/200903162117/flvl_test_agg_vggish.csv')
-    flvl_r21d = pd.read_csv('./filling_level/r21d_rgb/predictions/200903214601/flvl_test_agg_r21d_rgb.csv')
+    # flvl_r21d = pd.read_csv('./filling_level/r21d_rgb/predictions/200903214601/flvl_test_agg_r21d_rgb.csv')
 
     flvl_vggish = flvl_vggish[cols_with_probs_1]
-    flvl_r21d = flvl_r21d[cols_with_probs_1]
+    # flvl_r21d = flvl_r21d[cols_with_probs_1]
 
-    flvl_combined = (flvl_vggish.values + flvl_r21d.values) / 2
+    # flvl_combined = (flvl_vggish.values + flvl_r21d.values) / 2
+    flvl_combined = flvl_vggish.values
 
     # we also observed that adding pyAudioAnalysis' random forest predictions, improves valid performance
     # cols_with_probs_2 = ['Filling level [%] prob0', 'Filling level [%] prob1', 'Filling level [%] prob2']
