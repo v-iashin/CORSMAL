@@ -16,12 +16,11 @@ Technically, the main task requires to estimate the  overall  filling  mass  est
 - Filling type classification (boxes: pasta, rice; glasses/cups: water, pasta, rice; or nothing (empty))
 - Filling level classification (0, 50, 90%)
 
-## [CORSMAL dataset](http://corsmal.eecs.qmul.ac.uk/containers_manip.html) 🥤🍚🥛
-
+## [CORSMAL dataset](http://corsmal.eecs.qmul.ac.uk/containers_manip.html) 🥤📘🥛
 - The dataset consists of **15 containers**: 5 drinking cups, glasses, and food boxes. These containers are made of different materials, such as **plastic**, **glass**, and **paper**.
 - A container can be **filled with water** (only glasses and cups), **rice or pasta** at 3 different levels of **0, 50, and 90%** with respect to the capacity of the container.
 - All different combinations of containers are executed by a **different subject** (12) for each **background** (2) and **illumination** condition (2). The total number of configurations is **1140**.
-- Each event in the dataset is acquired with several sensors, making the CORSMAL dataset to be multi-modal
+- Each event in the dataset is acquired with several sensors, making the CORSMAL dataset to be **multi-modal**
     - 4 cameras (1280x720@30Hz):
         - RGB,
         - narrow-baseline stereo infrared,

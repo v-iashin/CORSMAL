@@ -89,33 +89,7 @@ def set_seed(seed):
     torch.cuda.manual_seed_all(seed)
 
 
-def experiment(cfg, fold):
-    print(fold)
-    set_seed(cfg.seed)
-
-    device = torch.device(cfg.device)
-
-    datasets = {
-        'train': AudioDataset(cfg.data_root, fold['train'], 'train'),
-        'valid': AudioDataset(cfg.data_root, fold['valid'], 'valid'),
-        'test': AudioDataset(cfg.data_root, fold['test'], 'test'),
-    }
-
-    dataloaders = {
-        'train': DataLoader(
-            datasets['train'], batch_size=cfg.batch_size, shuffle=True,
-            collate_fn=datasets['train'].collate_fn
-        ),
-        'valid': DataLoader(
-            datasets['valid'], batch_size=cfg.batch_size, shuffle=False,
-            collate_fn=datasets['valid'].collate_fn
-        ),
-        'test': DataLoader(
-            datasets['test'], batch_size=cfg.batch_size, shuffle=False,
-            collate_fn=datasets['test'].collate_fn
-        )
-    }
-
+def train(cfg, datasets, dataloaders, device, save_model_path):
     model = RNN(
         cfg.model_type, cfg.input_dim, cfg.hidden_dim, cfg.n_layers, cfg.drop_p, cfg.output_dim, cfg.bi_dir
     )
@@ -189,26 +163,25 @@ def experiment(cfg, fold):
 
     print(f'Best val Metric {best_metric:3f} @ {best_epoch+1}\n')
 
-    # load best model weights
+    # load best model weights and saves it
     model.load_state_dict(best_model_wts)
+    torch.save(model.state_dict(), save_model_path)
+    print(f'model is saved @ {save_model_path}')
+    return best_metric
 
-    # make predictions
-    predict(
-        cfg, model, dataloaders['train'],
-        f'./predictions/{cfg.init_time}/{cfg.task}_train_{"_".join([str(i) for i in fold["train"]])}_vggish.csv')
-    predict(
-        cfg, model, dataloaders['valid'],
-        f'./predictions/{cfg.init_time}/{cfg.task}_valid_{"_".join([str(i) for i in fold["valid"]])}_vggish.csv')
-    test_predictions = predict(
-        cfg, model, dataloaders['test'],
-        f'./predictions/{cfg.init_time}/{cfg.task}_test_trained_on_{"_".join([str(i) for i in fold["train"]])}_vggish.csv')
 
-    return best_metric, test_predictions
+def predict(cfg, model_path, loader, device, save_path):
+    print(f'Saving predictions @ {save_path}')
+    # define model
+    model = RNN(
+        cfg.model_type, cfg.input_dim, cfg.hidden_dim, cfg.n_layers, cfg.drop_p, cfg.output_dim, cfg.bi_dir
+    )
+    model = model.to(device)
+    # load the model
+    model.load_state_dict(torch.load(model_path))
 
-def predict(cfg, model, loader, save_path):
     # just to be sure
     model.eval()
-    device = torch.device(cfg.device)
 
     predictions = {
         'Object': [],
@@ -238,20 +211,70 @@ def predict(cfg, model, loader, save_path):
     # returning the dataset because it will be useful for test-time prediction averaging
     return predictions_dataset
 
-def run_kfold(cfg):
+
+def experiment(cfg, fold, use_pretrained):
+    print(fold)
+    set_seed(cfg.seed)
+
+    device = torch.device(cfg.device)
+
+    datasets = {
+        'train': AudioDataset(cfg.data_root, fold['train'], 'train'),
+        'valid': AudioDataset(cfg.data_root, fold['valid'], 'valid'),
+        'test': AudioDataset(cfg.data_root, fold['test'], 'test'),
+    }
+
+    dataloaders = {
+        'train': DataLoader(
+            datasets['train'], batch_size=cfg.batch_size, shuffle=True,
+            collate_fn=datasets['train'].collate_fn
+        ),
+        'valid': DataLoader(
+            datasets['valid'], batch_size=cfg.batch_size, shuffle=False,
+            collate_fn=datasets['valid'].collate_fn
+        ),
+        'test': DataLoader(
+            datasets['test'], batch_size=cfg.batch_size, shuffle=False,
+            collate_fn=datasets['test'].collate_fn
+        )
+    }
+    model_path = f'./predictions/{cfg.init_time}/{cfg.task}_{"_".join([str(i) for i in fold["train"]])}_pretrained_model.pt'
+
+    if use_pretrained:
+        print('Using')
+        best_metric = -1.0
+    else:
+        best_metric = train(cfg, datasets, dataloaders, device, model_path)
+
+    # make predictions
+    predict(
+        cfg, model_path, dataloaders['train'], device,
+        f'./predictions/{cfg.init_time}/{cfg.task}_train_{"_".join([str(i) for i in fold["train"]])}_vggish.csv')
+    predict(
+        cfg, model_path, dataloaders['valid'], device,
+        f'./predictions/{cfg.init_time}/{cfg.task}_valid_{"_".join([str(i) for i in fold["valid"]])}_vggish.csv')
+    test_predictions = predict(
+        cfg, model_path, dataloaders['test'], device,
+        f'./predictions/{cfg.init_time}/{cfg.task}_test_trained_on_{"_".join([str(i) for i in fold["train"]])}_vggish.csv')
+
+    return best_metric, test_predictions
+
+
+def run_kfold(cfg, use_pretrained=False):
     save_results = os.path.join('./predictions/', str(cfg.init_time))
-    # replace cfg.init_time  with current time f'_{strftime("%y%m%d%H%M%S", localtime())}'
-    os.makedirs(save_results)
+    if use_pretrained is False:
+        os.makedirs(save_results)
     cfg.save_self_to(os.path.join(save_results, 'cfg.txt'))
     folds = [
         {'train': [1, 2, 4, 5, 7, 8], 'valid': [3, 6, 9], 'test': [10, 11, 12]},
         {'train': [1, 3, 4, 6, 7, 9], 'valid': [2, 5, 8], 'test': [10, 11, 12]},
         {'train': [2, 3, 5, 6, 8, 9], 'valid': [1, 4, 7], 'test': [10, 11, 12]}
     ]
-    best_fold_metrics_and_test_predictions = [experiment(cfg, fold) for fold in folds]
+    best_fold_metrics_and_test_predictions = [experiment(cfg, fold, use_pretrained) for fold in folds]
     best_fold_metrics = [metric for metric, _ in best_fold_metrics_and_test_predictions]
     test_predictions = [preds for _, preds in best_fold_metrics_and_test_predictions]
-    print(f'Average of Best Metrics on Each Valid Set: {np.mean(best_fold_metrics):4f}, {cfg.init_time}')
+    if use_pretrained is False:
+        print(f'Average of Best Metrics on Each Valid Set: {np.mean(best_fold_metrics):4f}, {cfg.init_time}')
 
     # averaging predictions from all tree folds
     aggregated_dataset = test_predictions[0].copy()
@@ -265,16 +288,22 @@ def run_kfold(cfg):
         os.path.join(save_results, f'{cfg.task}_test_agg_vggish.csv'),
         index=False
     )
+    print(f'Saved test results @ {os.path.join(save_results, f"{cfg.task}_test_agg_vggish.csv")}')
 
 
 if __name__ == "__main__":
     # Reproduce the best experiment
+    # if True, will use the pre-trained model and make predictions, if False, will train the model
+    use_pretrained = True
     exp_name = 200903162117
     cfg = Config()
     cfg.load_from(path=f'./predictions/{exp_name}/cfg.txt')
     # replacing the time with the old_time + current_time such that there is no collision
-    cfg.init_time = f'{cfg.init_time}_{strftime("%y%m%d%H%M%S", localtime())}'
-    run_kfold(cfg)  # Expected average of Best Metrics on Each Valid Set: 0.755171 @ 200903162117
+    if use_pretrained:
+        cfg.init_time = exp_name
+    else:
+        cfg.init_time = f'{cfg.init_time}_{strftime("%y%m%d%H%M%S", localtime())}'
+    run_kfold(cfg, use_pretrained)  # Expected average of Best Metrics on Each Valid Set: 0.755171 @ 200903162117
 
     # # Experiment with other parameters
     # cfg = Config()
