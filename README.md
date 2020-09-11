@@ -48,8 +48,40 @@ Each folder in this repo corresponds to a dedicated task. Filling level and type
     - `README.md`
 
 ## How to run
-1. Clone the repo recursively (with all submodule): `git clone --recursive https://github.com/v-iashin/CORSMAL.git`.
-2. Run `./main.py` (requires `pandas`, though) it will take the predictions from each subtask folder and form the final submission file.
 
-To train and obtain the individual prediction files, follow the instructions provided in `README` in individual sub-tasks folders.
-Each folder has its environment, so you will need to install each of them and run the training/prediction procedure. Please note, it might give you _slightly_ different results depending on your hardware. We observed that the change is 🤏 `<0.01`.
+Clone the repo recursively (with all submodule):
+```bash
+git clone --recursive https://github.com/v-iashin/CORSMAL.git
+```
+All python environements can be installed via `conda` and tested, at least, on Linux. [How to install conda follow this guide](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html) – `miniconda3` is recommended. Once `conda` is installed, run the following commands to install all required environments for each sub-task
+```bash
+# it will create `capacity` environment
+conda env create -f ./capacity/LoDE_linux.yml
+# it will create `corsmal` environment
+conda env create -f ./filling_level/vggish/environment.yml
+# it will create `pyAudioAnalysis` environment
+conda env create -f ./filling_level/CORSMAL-pyAudioAnalysis/environment.yml
+```
+Installation should not give you any error. If some package fails to be installed, please let us know in Issues.
+
+How to use the installed environments? One way is to activate the installed environments. For instance,
+```bash
+conda activate capacity
+# it will print the path to python with all packages installed for capacity environemnt
+which python
+conda deactivate
+# if you are still in (base) environment, type conda deactivate again
+which python
+```
+Another way is to use the path to `python` in a specfic environment:
+```bash
+~/miniconda3/envs/corsmal/bin/python  YOUR_PYTHON_SCRIPT.py
+```
+
+To reprodce the results please follow:
+1. Capacity: `./capacity/README.md`
+2. Filling Level: `./filling_level/CORSMAL-pyAudioAnalysis/README.md` (lines with `fu`) and `./filling_level/README.md`
+3. Filling Type: `./filling_type/CORSMAL-pyAudioAnalysis/README.md` (lines with `fi`) and `./filling_type/README.md`
+4. Finally, run `./main.py` (using, i.e. `corsmal` conda env) it will take the predictions from each subtask folder and form the final submission file
+
+Please note, we undertook extreme care to make sure our results are reproducible by fixing the seeds and package version. However, the training on another hardware might give you _slightly_ different results. We observed that the change is 🤏 `<0.01`.
