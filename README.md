@@ -5,7 +5,7 @@ The 🏆 Winning Solution (in all sub-tasks) to the 3-day competition on the COR
 ## Team 👋
 - Gokhan Solak ([LinkedIn](https://www.linkedin.com/in/gkhnsolak/), g.solak@qmul.ac.uk)
 - Francesca Palermo ([LinkedIn](https://www.linkedin.com/in/francesca-palermo-a9107a40/), f.palermo@qmul.ac.uk)
-- Claudio Coppola ([LinkedIn](https://www.linkedin.com/in/clcoppola/) c.coppola@qmul.ac.uk)
+- Claudio Coppola ([LinkedIn](https://www.linkedin.com/in/clcoppola/), c.coppola@qmul.ac.uk)
 - Vladimir Iashin ([LinkedIn](https://www.linkedin.com/in/vladimir-iashin/), vladimir.iashin@tuni.fi)
 
 ## Task
@@ -55,7 +55,7 @@ git clone --recursive https://github.com/v-iashin/CORSMAL.git
 ```
 All python environements can be installed via `conda` and tested, at least, on Linux. [How to install conda follow this guide](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html) – `miniconda3` is recommended. Once `conda` is installed, run the following commands to install all required environments for each sub-task
 ```bash
-# it will create `capacity` environment
+# it will create `LoDE` environment
 conda env create -f ./capacity/LoDE_linux.yml
 # it will create `corsmal` environment
 conda env create -f ./filling_level/vggish/environment.yml
@@ -64,24 +64,19 @@ conda env create -f ./filling_level/CORSMAL-pyAudioAnalysis/environment.yml
 ```
 Installation should not give you any error. If some package fails to be installed, please let us know in Issues.
 
-How to use the installed environments? One way is to activate the installed environments. For instance,
+How to use the installed environments? One way is to activate the installed environments and run the scripts from `python` command.
+Another way is to use the path to `python` in a specfic environment to run your scripts:
 ```bash
-conda activate capacity
-# it will print the path to python with all packages installed for capacity environemnt
-which python
-conda deactivate
-# if you are still in (base) environment, type conda deactivate again
-which python
-```
-Another way is to use the path to `python` in a specfic environment:
-```bash
-~/miniconda3/envs/corsmal/bin/python  YOUR_PYTHON_SCRIPT.py
+$ conda activate LoDE
+(LoDE) $ python  YOUR_PYTHON_SCRIPT.py
+# which is equivalant to
+$ ~/miniconda3/envs/LoDE/bin/python  YOUR_PYTHON_SCRIPT.py
 ```
 
-To reprodce the results please follow:
+To reprodce the results please follow the guidelines provided in `README`s:
 1. Capacity: `./capacity/README.md`
 2. Filling Level: `./filling_level/CORSMAL-pyAudioAnalysis/README.md` (lines with `fu`) and `./filling_level/README.md`
 3. Filling Type: `./filling_type/CORSMAL-pyAudioAnalysis/README.md` (lines with `fi`) and `./filling_type/README.md`
 4. Finally, run `./main.py` (using, i.e. `corsmal` conda env) it will take the predictions from each subtask folder and form the final submission file
 
-Please note, we undertook extreme care to make sure our results are reproducible by fixing the seeds and package version. However, the training on another hardware might give you _slightly_ different results. We observed that the change is 🤏 `<0.01`.
+Please note, we undertook extreme care to make sure our results are reproducible by fixing the seeds, sharing the pre-trained models, and package versions. However, the training on another hardware might give you _slightly_ different results. We observed that the change is 🤏 `<0.01`.
