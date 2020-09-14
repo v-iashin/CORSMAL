@@ -3,20 +3,21 @@ import shutil
 import os
 import pandas as pd
 
-def extract_frames (object_set, modality_set, frame):
+def extract_frames (data_path, object_set, modality_set, frame):
     for object in object_set:
         for modality in modality_set:
             if modality=='rgb' or modality=='ir':
-                extract_frames_rgb(object, modality, frame)
+                extract_frames_rgb(data_path, object, modality, frame)
             elif modality == 'depth':
                 print('***************DEPTH **********************')
-                extract_frames_depth(object, modality, frame)
+                extract_frames_depth(data_path, object, modality, frame)
 
-def extract_frames_rgb(object, modality, frame):
-    videos_path = os.getcwd() + '/video_database/' + object + '/' + modality + '/'
+def extract_frames_rgb(data_path, object, modality, frame):
+    # videos_path = os.getcwd() + '/video_database/' + object + '/' + modality + '/'
+    videos_path = data_path + '/' + object + '/' + modality + '/'
     frames_path = os.getcwd() + '/dataset/images/' + object + '/' + frame + '/'
     if not os.path.exists(frames_path):
-        os.mkdir(frames_path)
+        os.makedirs(frames_path)
     for filename in os.listdir(videos_path):
         #AVOID PUTTING THE .MP4 EXTENSION IN THE PATH
         save_image_path = frames_path + 'id' + object + '_' + filename[0:-4] + '_' + modality + '.png'
@@ -37,10 +38,9 @@ def extract_frames_rgb(object, modality, frame):
         vidcap.release()
 
 
-
-def extract_frames_depth(object, modality, frame):
-    #TODO to modify if possible to make it easier
-    videos_path = os.getcwd() + '/video_database/' + object + '/' + modality + '/'
+def extract_frames_depth(data_path, object, modality, frame):
+    # videos_path = os.getcwd() + '/video_database/' + object + '/' + modality + '/'
+    videos_path = data_path + '/' + object + '/' + modality + '/'
     frames_path = os.getcwd() + '/dataset/images/' + object + '/' + frame + '/'
     for root, first_level_dirs, first_level_files in os.walk(videos_path):
         for first_level_dir in first_level_dirs:
@@ -55,8 +55,6 @@ def extract_frames_depth(object, modality, frame):
                         filename = filename_list[-20]
                     # filename = filename_list[-5]
                     # filename = max(filename_list)
-                    # for filename in os.listdir(second_level_joined_path):
-                    #     if filename == '0000.png':
                     original_path = root + first_level_dir + '/' + second_level_dir + '/' + filename
                     to_move_path = frames_path + 'id' + object + '_' + first_level_dir + '_' + second_level_dir + '_depth.png'
                     if os.path.exists(to_move_path):
@@ -75,7 +73,6 @@ def combine_results_csv(average_training_set):
     data_1frame = pd.read_csv(path_to_load + csv_1frame_path)
     data_20frame = pd.read_csv(path_to_load + csv_20frame_path)
     combined_file = pd.DataFrame(data=data_1frame[['fileName', 'capacity[mL]']].values, columns=['fileName', 'capacity[mL]'])
-
 
     for index, row in data_1frame.iterrows():
         if(row['capacity[mL]'] != average_training_set) and data_20frame['capacity[mL]'][index] != average_training_set:

@@ -28,8 +28,9 @@ source activate LoDE
 Download the CORSMAL Containers Manipulation dataset (http://corsmal.eecs.qmul.ac.uk/containers_manip.html)
 An example has been already downloaded and inserted in the Github repository.
 
-The video dataset should be in the same working directory than LoDE.
+You can pass the __video_database__ folder as argument when starting the __main.py__ script.
 We expect your __video_database__ folder to be organized like this. So you will only need to unzip `depth`, `ir`, and `rgb` from the original dataset.
+The `calibration` folder will be already included in the correct folder when downloading this Github repository.
 ```
 ./video_database
 ├── 10
@@ -51,14 +52,12 @@ The code will extract frames from the videos presents in __video_database__ and 
 # Run on the Test Set
 Run LoDE on the whole testing set
 ```bash
-python main.py
+python main.py --data_path PATH_TO_DATABASE
 ```
 
 ## Output
 This version of LoDE will outputs four results:
-* Dimensions estimation of the height of the container in milimeters in results/estimation.txt
-* Dimensions estimation of the width of the container in milimeters in results/estimation.txt
-* Dimensions estimation of the container capacity of the container in milliliters in results/estimation.txt
+* Dimensions estimation of the container capacity of the container in milliliters in results/estimation_combination.csv
 * Visual representation of the container shape in results/*.png. The visual representation can be removed by omitting the --draw commands
 
 

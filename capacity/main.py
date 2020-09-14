@@ -61,7 +61,7 @@ class LoDE:
         #ADDED METHOD to extract the frames from the video
         print('Extract frames from bigger database')
         for frame in frame_set:
-            utilities.extract_frames(object_set, modality_set, frame)
+            utilities.extract_frames(args.data_path, object_set, modality_set, frame)
 
         # Load object detection model
         self.detectionModel = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True)
@@ -184,6 +184,8 @@ if __name__ == '__main__':
     parser.add_argument('--filling_level', type=int, default=0)
     parser.add_argument('--background', type=int, default=0)
     parser.add_argument('--lighting', type=int, default=0)
+    #parser.add_argument('--data_path', type=str, default='/video_database/')
+    parser.add_argument('--data_path',  help='Path to the database directory.'),\
     parser.add_argument('--draw', default=False, action='store_true', help='Output visual results in ./results')
     args = parser.parse_args()
 
@@ -198,7 +200,6 @@ if __name__ == '__main__':
         with f:
             writer = csv.writer(f)
             writer.writerow(['fileName','height[mm]','width[mm]','capacity[mL]', 'frame'])
-            #f.write('fileName\theight[mm]\twidth[mm]\tcapacity[mL]\n')
         f.close()
         for args.object in object_set:
             lode.run()
