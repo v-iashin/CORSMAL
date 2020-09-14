@@ -1,4 +1,4 @@
-name: capacity
+name: LoDE
 channels:
   - pytorch
   - defaults

@@ -6,12 +6,17 @@ from time import localtime, strftime
 
 if __name__ == "__main__":
     # Reproduce the best experiment
+    # if True, will use the pre-trained model and make predictions, if False, will train the model
+    use_pretrained = True
     exp_name = 200903163404
     cfg = Config()
     cfg.load_from(path=f'./predictions/{exp_name}/cfg.txt')
     # replacing the time with the old_time + current_time such that there is no collision
-    cfg.init_time = f'{cfg.init_time}_{strftime("%y%m%d%H%M%S", localtime())}'
-    run_kfold(cfg)  # Expected average of Best Metrics on Each Valid Set: 0.912957 @ 200903163404
+    if use_pretrained:
+        cfg.init_time = exp_name
+    else:
+        cfg.init_time = f'{cfg.init_time}_{strftime("%y%m%d%H%M%S", localtime())}'
+    run_kfold(cfg, use_pretrained)  # Expected average of Best Metrics on Each Valid Set: 0.912957 @ 200903163404
 
     # Experiment with other parameters
     # cfg = Config()

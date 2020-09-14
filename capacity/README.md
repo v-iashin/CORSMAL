@@ -47,7 +47,15 @@ The `calibration` folder will be already included in the correct folder when dow
     └── rgb
 ```
 
-The code will extract frames from the videos presents in __video_database__ and will move them into the corresponding __dataset__ folder.
+The code will extract frames from the videos presents in __video_database__ and will move them into the corresponding __dataset__ folder. For example, using this script
+```bash
+#!/bin/bash
+CORSMAL_PATH="/YOUR/PATH/WITH/NO/TRAILING/SLASH"
+for container_id in {1..12}
+do
+cp -r $CORSMAL_PATH"/"$container_id "./capacity/video_datatabase/"
+done
+```
 
 # Run on the Test Set
 Run LoDE on the whole testing set
