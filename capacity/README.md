@@ -28,11 +28,11 @@ source activate LoDE
 Download the CORSMAL Containers Manipulation dataset (http://corsmal.eecs.qmul.ac.uk/containers_manip.html)
 An example has been already downloaded and inserted in the Github repository.
 
-You can pass the __data_path__ folder as argument when starting the __main.py__ script.
-We expect your __data_path__ folder to be organized like this. So you will only need to unzip `depth`, `ir`, and `rgb` from the original dataset.
+You can pass the __PATH_TO_DATABASE__ as argument when starting the __main.py__ script.
+We expect your __Database__ folder to be organised like this. So you will only need to unzip `depth`, `ir`, and `rgb` from the original dataset.
 The `calibration` folder will be already included in the correct folder when downloading this Github repository.
 ```
-./data_path
+<DATABASE_PATH>
 ├── 10
 │   ├── depth
 │   ├── ir
@@ -47,7 +47,7 @@ The `calibration` folder will be already included in the correct folder when dow
     └── rgb
 ```
 
-The code will extract frames from the videos presents in __data_path__ and will move them into the corresponding __dataset__ folder. 
+The code will extract frames from the videos presents in __PATH_TO_DATABASE__ and will move them into the corresponding __.\dataset__ folder. 
 
 # Run on the Test Set
 Run LoDE on the whole testing set
