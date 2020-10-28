@@ -7,7 +7,7 @@ FIRST_EVAL_CONTAINER=$3
 # you may want to switch it to `anaconda3` if you install anaconda instead of miniconda
 source /home/ubuntu/miniconda3/etc/profile.d/conda.sh
 
-# making sure we are not in 'base' or any other
+# making sure we are not in 'base' or any other env
 conda deactivate
 conda deactivate
 conda activate vggish
