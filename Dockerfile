@@ -11,7 +11,7 @@ RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 USER ubuntu
 
 RUN sudo apt-get update
-RUN sudo apt-get -qq install curl git zip libsndfile1
+RUN sudo apt-get -qq install curl vim nano git zip libsndfile1 libglib2.0-0 libsm6 libxext6 libxrender-dev
 
 WORKDIR /home/ubuntu/
 
@@ -25,6 +25,10 @@ RUN conda config --set auto_activate_base false
 RUN git clone --recursive https://github.com/v-iashin/CORSMAL.git
 
 WORKDIR /home/ubuntu/CORSMAL/
+
+# TODO
+RUN git checkout docker
+
 RUN curl https://storage.googleapis.com/audioset/vggish_model.ckpt -o ./filling_level/vggish/video_features/models/vggish/checkpoints/vggish_model.ckpt
 RUN conda env create -f ./filling_level/vggish/video_features/conda_env_vggish.yml
 RUN conda env create -f ./filling_level/r21d_rgb/video_features/conda_env_r21d.yml
@@ -33,5 +37,3 @@ RUN conda env create -f ./filling_level/CORSMAL-pyAudioAnalysis/environment.yml
 RUN conda env create -f ./capacity/LoDE_linux.yml
 
 RUN conda clean -afy
-
-RUN conda install -y vim -c conda-forge

@@ -156,7 +156,7 @@ class LoDE:
 
     def run(self):
 
-        calibration_path = './dataset/calibration/{}'.format(args.object)
+        calibration_path = os.path.join(args.data_path, args.object, 'calib')
         image_path = './dataset/images/{}/{}'.format(args.object, frame)
 
         # path exists?
