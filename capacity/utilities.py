@@ -64,11 +64,11 @@ def extract_frames_depth(data_path, object, modality, frame):
                     print(to_move_path + ' --- COPIED')
 
 
-def combine_results_csv(average_training_set):
+def combine_results_csv(average_training_set, phase):
     path_to_load = 'results/'
-    csv_1frame_path = 'estimation_1.csv'
-    csv_20frame_path = 'estimation_20.csv'
-    combined_file_path = 'estimation_combination.csv'
+    csv_1frame_path = f'estimation_1_{phase}.csv'
+    csv_20frame_path = f'estimation_20_{phase}.csv'
+    combined_file_path = f'estimation_combination_{phase}.csv'
 
     data_1frame = pd.read_csv(path_to_load + csv_1frame_path)
     data_20frame = pd.read_csv(path_to_load + csv_20frame_path)
@@ -85,9 +85,3 @@ def combine_results_csv(average_training_set):
             combined_file['capacity[mL]'][index] = row['capacity[mL]']
 
     combined_file.to_csv(path_to_load + combined_file_path)
-
-
-
-
-
-

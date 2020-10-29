@@ -10,7 +10,7 @@ echo "STARTING PART 1/3..."
 FIRST_EVAL_CONTAINER=1
 # extract features (the first arg `0` is the device id)
 cd ./filling_level/vggish
-# bash ./extract_features.sh 0 $DATA_ROOT $FIRST_EVAL_CONTAINER
+bash ./extract_features.sh 0 $DATA_ROOT $FIRST_EVAL_CONTAINER
 # cd ../r21d_rgb
 # bash ./extract_features.sh 0 $DATA_ROOT $FIRST_EVAL_CONTAINER
 cd ../../
@@ -32,3 +32,8 @@ python main.py --predict_on_private
 cd ../../
 
 conda deactivate
+
+echo "STARTING PART 2/3..."
+conda activate LoDE
+cd ./capacity
+python main.py --data_path $DATA_ROOT
