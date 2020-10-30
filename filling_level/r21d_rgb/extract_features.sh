@@ -1,5 +1,5 @@
 #!/bin/bash
-DEVICE=$1
+DEVICES=$1
 # the same as =$2 but removes trailing slash in the path
 DATA_ROOT=${2%/}
 FIRST_EVAL_CONTAINER=$3
@@ -29,7 +29,7 @@ fi
 # run feature extraction
 python main.py \
     --feature_type r21d_rgb \
-    --device_ids $DEVICE \
+    --device_ids $DEVICES \
     --on_extraction save_numpy \
     --video_paths $(find $DATA_ROOT/$container_id/rgb/ -name "*.mp4")\
     --output_path "../r21d_rgb_features/"$container_id"/r21d_rgb"

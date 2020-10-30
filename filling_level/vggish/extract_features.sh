@@ -1,5 +1,5 @@
 #!/bin/bash
-DEVICE=$1
+DEVICES=$1
 # the same as =$2 but removes trailing slash in the path
 DATA_ROOT=${2%/}
 FIRST_EVAL_CONTAINER=$3
@@ -29,7 +29,7 @@ fi
 # run feature extraction
 python main.py \
     --feature_type vggish \
-    --device_ids $DEVICE \
+    --device_ids $DEVICES \
     --on_extraction save_numpy \
     --video_paths $(find $DATA_ROOT/$container_id/audio -name "*.wav")\
     --output_path "../vggish_features/"$container_id"/vggish"
