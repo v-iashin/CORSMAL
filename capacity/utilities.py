@@ -25,7 +25,7 @@ def extract_frames_rgb(data_path, object, modality, frame):
             print(save_image_path + ' ---- EXISTS ')
             continue
         vidcap = cv2.VideoCapture(videos_path + filename)
-        print(filename + ' --- LOADING ')
+        # print(filename + ' --- LOADING ')  # too verbose
         #To extract last frame
         # vidcap.set(1, vidcap.get(7) - 5)
         # To extract 20th to last frame

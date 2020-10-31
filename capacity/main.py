@@ -160,9 +160,10 @@ class LoDE:
         image_path = './dataset/images/{}/{}'.format(args.object, frame)
 
         # path exists?
-        if not os.path.isdir(calibration_path):
-            print("Can't find path "+calibration_path)
-            return
+        assert os.path.isdir(calibration_path), "Can't find path "+calibration_path
+        # if not os.path.isdir(calibration_path):
+        #     print("Can't find path "+calibration_path)
+        #     return
 
         # list all files in the calibration, so we will have a list
         # match their "id" part, to later find the same case in other folders

@@ -31,6 +31,6 @@ python main.py \
     --feature_type vggish \
     --device_ids $DEVICES \
     --on_extraction save_numpy \
-    --video_paths $(find $DATA_ROOT/$container_id/audio -name "*.wav")\
+    --video_paths $(find $DATA_ROOT/$container_id/audio/ -name "*.wav")\
     --output_path "../vggish_features/"$container_id"/vggish"
 done
