@@ -81,3 +81,7 @@ cp ./models/ftype* .
 python ./src/apply_existing_model.py -d $target_data_path/final/fi/test -m "ftype-randomforest-final" -c "fi" --predict_on_private
 # return bach to root
 cd ../../
+
+echo "Gathering predictions from all three tasks..."
+# remove `--predict_on_private` if only predictions on public test are needed
+python main.py --predict_on_private

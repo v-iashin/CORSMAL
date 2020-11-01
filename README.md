@@ -29,9 +29,6 @@ Technically, the main task requires to estimate the  overall  filling  mass  est
         - calibration
     - 8-channel 44.1 kHz audio;
 
-## Evaluation
-For filling type and level classification, we employ 3-Fold validation, preserving the box/glass/cup ratio as in the test set.
-
 ## Folder organization
 
 Each folder in this repo corresponds to a dedicated task. Filling level and types have two or three different approaches and, hence, each approach has an individual folder.
@@ -47,36 +44,66 @@ Each folder in this repo corresponds to a dedicated task. Filling level and type
     - `/vggish`
     - `README.md`
 
-## How to run
+## How to run evaluation?
 
-Clone the repo recursively (with all submodule):
+We recommend to use our docker image to run the evaluation script. (To experement with different approaches, inspect individual README files inside of the task folders.)
+Running the script will take ~3 hours on 10-core i9-7900X X-series, 4x1080Ti (one gpu is enough), RAM 64Gb (or at least 20Gb), 30Gb of extra disk space (besides the dataset).
+
+Clone the repo recursively (with all submodules):
 ```bash
 git clone --recursive https://github.com/v-iashin/CORSMAL.git
 ```
-All python environements can be installed via `conda` and tested, at least, on Linux. [How to install conda follow this guide](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html) – `miniconda3` is recommended. Once `conda` is installed, run the following commands to install all required environments for each sub-task
+
+[Install docker](https://docs.docker.com/engine/install/) (19.03.13) and run our script
 ```bash
-# it will create `LoDE` environment
-conda env create -f ./capacity/LoDE_linux.yml
-# it will create `corsmal` environment
-conda env create -f ./filling_level/vggish/environment.yml
-# it will create `pyAudioAnalysis` environment
-conda env create -f ./filling_level/CORSMAL-pyAudioAnalysis/environment.yml
-```
-Installation should not give you any error. If some package fails to be installed, please let us know in Issues.
+# pull our image from the docker hub
+docker pull iashin/corsmal:latest
 
-How to use the installed environments? One way is to activate the installed environments and run the scripts from `python` command.
-Another way is to use the path to `python` in a specfic environment to run your scripts:
-```bash
-$ conda activate LoDE
-(LoDE) $ python  YOUR_PYTHON_SCRIPT.py
-# which is equivalant to
-$ ~/miniconda3/envs/LoDE/bin/python  YOUR_PYTHON_SCRIPT.py
+# source: the path to dir with corsmal on the host; destination: path where the sorce folder will be mounted
+# if you would like to attach shell (and debug) just append `/bin/bash` to the command above
+# because, by default, it will run the evaluation script
+docker run \
+    --mount type=bind,source=/path/to/corsmal/,destination=/home/ubuntu/CORSMAL/dataset/ \
+    -it --gpus '"device=0,1,2,3"' \
+    corsmal:latest
+
+# copy submission files from the container once it finishes running the script
+docker cp container_id:/home/ubuntu/CORSMAL/submission_public_test.csv .
+docker cp container_id:/home/ubuntu/CORSMAL/submission_private_test.csv .
 ```
 
-To reprodce the results please follow the guidelines provided in `README`s:
-1. Capacity: `./capacity/README.md`
-2. Filling Level: `./filling_level/CORSMAL-pyAudioAnalysis/README.md` (lines with `fu`) and `./filling_level/README.md`
-3. Filling Type: `./filling_type/CORSMAL-pyAudioAnalysis/README.md` (lines with `fi`) and `./filling_type/README.md`
-4. Finally, run `./main.py` (using, i.e. `corsmal` conda env) it will take the predictions from each subtask folder and form the final submission file
+The expected structure of the `DATA_ROOT` folder:
+```
+DATA_ROOT
+├── [1-9]
+│   ├── audios
+│   │   └── sS_fiI_fuU_bB_lL_audio.wav
+│   ├── calib
+│   │   └── sS_fiI_fuU_bB_lL_cC_calib.pickle
+│   ├── depth
+│   │   └── sS_fiI_fuU_bB_lL
+│   ├── ir
+│   │   └── sS_fiI_fuU_bB_lL_cC_irR.mp4
+│   └── rgb
+│       └── sS_fiI_fuU_bB_lL_cC.mp4
+└── [10-15]
+    ├── audio
+    │   └── XXXX
+    ├── calib
+    │   └── XXXX_cC_calib.pickle
+    ├── depth
+    │   └── XXXX
+    ├── ir
+    │   └── XXXX_cC_irR.mp4
+    └── rgb
+        └── XXXX_cC.mp4
+```
 
-Please note, we undertook extreme care to make sure our results are reproducible by fixing the seeds, sharing the pre-trained models, and package versions. However, the training on another hardware might give you _slightly_ different results. We observed that the change is 🤏 `<0.01`.
+Please note, we undertook extreme care to make sure our results are reproducible by fixing the seeds, sharing the pre-trained models, and package versions. However, the training on another hardware might give you _slightly_ different results. We observed that the change is 🤏  `<0.01`.
+
+
+## License
+We distribute our code under MIT licence. Yet, our code relies on libraries which have different licence.
+- LoDE (container capacity): Creative Commons Attribution-NonCommercial 4.0
+- pyAudioAnalysis (filling level and type): Apache-2.0 License
+- video_features (filling level and type): [check here: ](https://github.com/v-iashin/video_features/tree/e0eba1b738e3ec7db81c3584581e53eb9df06665)
