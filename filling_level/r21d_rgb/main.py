@@ -413,7 +413,7 @@ if __name__ == "__main__":
         cfg.init_time = f'{cfg.init_time}_{strftime("%y%m%d%H%M%S", localtime())}'
 
     # Expected average of Best Metrics on Each Valid Set: 0.747354 @ 200903214601
-    run_kfold(cfg, use_pretrained, get_cmd_args.predict_on_private)
+    run_kfold(cfg, use_pretrained, get_cmd_args().predict_on_private)
 
     # Experiment with other parameters
     # cfg = Config()
