@@ -32,7 +32,7 @@ class RGBDataset(torch.utils.data.Dataset):
         # (T, cam_num, D)
         inputs = inputs.permute((1, 0, 2))
 
-        if self.phase == 'test':
+        if self.phase == 'public_test' or self.phase == 'private_test':
             targets = None
         else:
             targets = {
@@ -65,7 +65,7 @@ class RGBDataset(torch.utils.data.Dataset):
         # (B, cam_num, T, D) <- (B, T, cam_num, D)
         out['inputs'] = padded_seq.permute((0, 2, 1, 3))
 
-        if self.phase == 'test':
+        if self.phase == 'public_test' or self.phase == 'private_test':
             out['targets'] = None
         else:
             out['targets']['ftype'] = torch.tensor([item['targets']['ftype'] for item in batch])
@@ -87,6 +87,7 @@ class RGBDataset(torch.utils.data.Dataset):
             # form list of paths (will use only paths to c1 but later use all 4 cameras)
             paths = sorted(glob(os.path.join(self.data_root, f'{container_type}', 'r21d_rgb', '*c1_rgb.npy')))
             paths = [path.replace(f'{self.data_root}/', '') for path in paths]
+            assert len(paths) > 0, f'folder with features for container {container_type} doesnt exist'
             # parse the file names
             for path in paths:
                 # '/X/vggish || sX_fiX_fuX_bX_lX_vggish.npy'
@@ -120,23 +121,29 @@ if __name__ == "__main__":
 
     train = RGBDataset(DATA_ROOT, [1, 2, 3, 4, 5, 6], 'train')
     valid = RGBDataset(DATA_ROOT, [7, 8, 9], 'valid')
-    test = RGBDataset(DATA_ROOT, [10, 11, 12], 'test')
+    public_test = RGBDataset(DATA_ROOT, [10, 11, 12], 'public_test')
+    private_test = RGBDataset(DATA_ROOT, [13, 14, 15], 'private_test')
 
     train_loader = DataLoader(train, batch_size=4, shuffle=True, collate_fn=train.collate_fn)
     valid_loader = DataLoader(valid, batch_size=2, shuffle=False, collate_fn=valid.collate_fn)
-    test_loader = DataLoader(test, batch_size=2, shuffle=False, collate_fn=test.collate_fn)
-
+    public_test_loader = DataLoader(public_test, batch_size=2, shuffle=False,
+                                    collate_fn=public_test.collate_fn)
+    private_test_loader = DataLoader(private_test, batch_size=2, shuffle=False,
+                                     collate_fn=private_test.collate_fn)
     # tests
     idx = 50
     print(train[idx])
     print(train[idx]['inputs'].shape)
     print(valid[idx])
     print(valid[idx]['inputs'].shape)
-    print(test[idx])
-    print(test[idx]['inputs'].shape)
+    print(public_test[idx])
+    print(public_test[idx]['inputs'].shape)
+    print(private_test[idx])
+    print(private_test[idx]['inputs'].shape)
 
     loader = train_loader
-    loader = test_loader
+    loader = public_test_loader
+    loader = private_test_loader
 
     for batch in loader:
         print(batch)

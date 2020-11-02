@@ -29,6 +29,7 @@ def get_cmd_args() -> argparse.Namespace:
     parser.add_argument('--drop_p', default=0.0, type=float)
     parser.add_argument('--num_epochs', default=5, type=int)
     parser.add_argument('--seed', default=1337, type=int)
+    parser.add_argument('--predict_on_private', dest='predict_on_private', action='store_true', default=False)
     args = parser.parse_args()
     return args
 
@@ -282,7 +283,7 @@ def predict(cfg, model_path_c1, model_path_c2, model_path_c3, model_path_c4, loa
     return predictions_dataset
 
 
-def experiment(cfg, fold, use_pretrained):
+def experiment(cfg, fold, use_pretrained, predict_on_private):
     print(fold)
     set_seed(cfg.seed)
 
@@ -291,7 +292,7 @@ def experiment(cfg, fold, use_pretrained):
     datasets = {
         'train': RGBDataset(cfg.data_root, fold['train'], 'train'),
         'valid': RGBDataset(cfg.data_root, fold['valid'], 'valid'),
-        'test': RGBDataset(cfg.data_root, fold['test'], 'test'),
+        'public_test': RGBDataset(cfg.data_root, fold['public_test'], 'public_test'),
     }
 
     dataloaders = {
@@ -303,17 +304,26 @@ def experiment(cfg, fold, use_pretrained):
             datasets['valid'], batch_size=cfg.batch_size, shuffle=False,
             collate_fn=datasets['valid'].collate_fn
         ),
-        'test': DataLoader(
-            datasets['test'], batch_size=cfg.batch_size, shuffle=False,
-            collate_fn=datasets['test'].collate_fn
+        'public_test': DataLoader(
+            datasets['public_test'], batch_size=cfg.batch_size, shuffle=False,
+            collate_fn=datasets['public_test'].collate_fn
         )
     }
+
+    if predict_on_private:
+        datasets['private_test'] = RGBDataset(cfg.data_root, fold['private_test'], 'private_test')
+        dataloaders['private_test'] = DataLoader(
+            datasets['private_test'], batch_size=cfg.batch_size, shuffle=False,
+            collate_fn=datasets['private_test'].collate_fn
+        )
+
     model_path_c1 = f'./predictions/{cfg.init_time}/{cfg.task}_{"_".join([str(i) for i in fold["train"]])}_pretrained_model_c1.pt'
     model_path_c2 = f'./predictions/{cfg.init_time}/{cfg.task}_{"_".join([str(i) for i in fold["train"]])}_pretrained_model_c2.pt'
     model_path_c3 = f'./predictions/{cfg.init_time}/{cfg.task}_{"_".join([str(i) for i in fold["train"]])}_pretrained_model_c3.pt'
     model_path_c4 = f'./predictions/{cfg.init_time}/{cfg.task}_{"_".join([str(i) for i in fold["train"]])}_pretrained_model_c4.pt'
 
     if use_pretrained:
+        print(f'Using pre-trained model from {model_path_c1.split("/")[0]}')
         best_metric = -1.0
     else:
         best_metric = train(
@@ -321,49 +331,72 @@ def experiment(cfg, fold, use_pretrained):
         )
 
     # make predictions
+    test_predictions = {}
     predict(
         cfg, model_path_c1, model_path_c2, model_path_c3, model_path_c4, dataloaders['train'], device,
         f'./predictions/{cfg.init_time}/{cfg.task}_train_{"_".join([str(i) for i in fold["train"]])}_r21d_rgb.csv')
     predict(
         cfg, model_path_c1, model_path_c2, model_path_c3, model_path_c4, dataloaders['valid'], device,
         f'./predictions/{cfg.init_time}/{cfg.task}_valid_{"_".join([str(i) for i in fold["valid"]])}_r21d_rgb.csv')
-    test_predictions = predict(
-        cfg, model_path_c1, model_path_c2, model_path_c3, model_path_c4, dataloaders['test'], device,
-        f'./predictions/{cfg.init_time}/{cfg.task}_test_trained_on_{"_".join([str(i) for i in fold["train"]])}_r21d_rgb.csv')
+    test_predictions['public_test'] = predict(
+        cfg, model_path_c1, model_path_c2, model_path_c3, model_path_c4, dataloaders['public_test'], device,
+        f'./predictions/{cfg.init_time}/{cfg.task}_public_test_trained_on_{"_".join([str(i) for i in fold["train"]])}_r21d_rgb.csv')
+
+    if predict_on_private:
+        test_predictions['private_test'] = predict(
+            cfg, model_path_c1, model_path_c2, model_path_c3, model_path_c4, dataloaders['private_test'], device,
+            f'./predictions/{cfg.init_time}/{cfg.task}_private_test_trained_on_{"_".join([str(i) for i in fold["train"]])}_r21d_rgb.csv')
 
     return best_metric, test_predictions
 
 
-def run_kfold(cfg, use_pretrained=False):
+def run_kfold(cfg, use_pretrained=False, predict_on_private=None):
     save_results = os.path.join('./predictions/', str(cfg.init_time))
     # replace cfg.init_time  with current time f'_{strftime("%y%m%d%H%M%S", localtime())}'
     if use_pretrained is False:
         os.makedirs(save_results)
     cfg.save_self_to(os.path.join(save_results, 'cfg.txt'))
     folds = [
-        {'train': [1, 2, 4, 5, 7, 8], 'valid': [3, 6, 9], 'test': [10, 11, 12]},
-        {'train': [1, 3, 4, 6, 7, 9], 'valid': [2, 5, 8], 'test': [10, 11, 12]},
-        {'train': [2, 3, 5, 6, 8, 9], 'valid': [1, 4, 7], 'test': [10, 11, 12]}
+        {'train': [1, 2, 4, 5, 7, 8], 'valid': [3, 6, 9], 'public_test': [10, 11, 12], 'private_test': [13, 14, 15]},
+        {'train': [1, 3, 4, 6, 7, 9], 'valid': [2, 5, 8], 'public_test': [10, 11, 12], 'private_test': [13, 14, 15]},
+        {'train': [2, 3, 5, 6, 8, 9], 'valid': [1, 4, 7], 'public_test': [10, 11, 12], 'private_test': [13, 14, 15]}
     ]
-    best_fold_metrics_and_test_predictions = [experiment(cfg, fold, use_pretrained) for fold in folds]
+    best_fold_metrics_and_test_predictions = [experiment(cfg, fold, use_pretrained, predict_on_private) for fold in folds]
     best_fold_metrics = [metric for metric, _ in best_fold_metrics_and_test_predictions]
     test_predictions = [preds for _, preds in best_fold_metrics_and_test_predictions]
     if use_pretrained is False:
         print(f'Average of Best Metrics on Each Valid Set: {np.mean(best_fold_metrics):4f}, {cfg.init_time}')
 
-    # averaging predictions from all tree folds
-    aggregated_dataset = test_predictions[0].copy()
+    # # averaging predictions from all tree folds
+    # aggregated_dataset = test_predictions[0].copy()
 
-    for c in range(cfg.output_dim):
-        column = f'{cfg.task}_prob_{c}'
-        fold_columns = [test_predictions[f][column] for f in range(len(folds))]
-        aggregated_dataset[column] = np.mean(fold_columns, axis=0)
+    # for c in range(cfg.output_dim):
+    #     column = f'{cfg.task}_prob_{c}'
+    #     fold_columns = [test_predictions[f][column] for f in range(len(folds))]
+    #     aggregated_dataset[column] = np.mean(fold_columns, axis=0)
 
-    aggregated_dataset.to_csv(
-        os.path.join(save_results, f'{cfg.task}_test_agg_r21d_rgb.csv'),
-        index=False
-    )
-    print(f'Saved test results @ {os.path.join(save_results, f"{cfg.task}_test_agg_r21d_rgb.csv")}')
+    # aggregated_dataset.to_csv(
+    #     os.path.join(save_results, f'{cfg.task}_test_agg_r21d_rgb.csv'),
+    #     index=False
+    # )
+    # print(f'Saved test results @ {os.path.join(save_results, f"{cfg.task}_test_agg_r21d_rgb.csv")}')
+    def _agg_preds_from_all_folds(phase='public_test'):
+        # averaging predictions from all tree folds
+        aggregated_dataset = test_predictions[0][phase].copy()
+        for c in range(cfg.output_dim):
+            column = f'{cfg.task}_prob_{c}'
+            fold_columns = [test_predictions[f][phase][column] for f in range(len(folds))]
+            aggregated_dataset[column] = np.mean(fold_columns, axis=0)
+        aggregated_dataset.to_csv(
+            os.path.join(save_results, f'{cfg.task}_{phase}_agg_r21d_rgb.csv'),
+            index=False
+        )
+        print(f'Saved test results @ {os.path.join(save_results, f"{cfg.task}_{phase}_agg_r21d_rgb.csv")}')
+
+    _agg_preds_from_all_folds('public_test')
+
+    if predict_on_private:
+        _agg_preds_from_all_folds('private_test')
 
 
 if __name__ == "__main__":
@@ -378,7 +411,9 @@ if __name__ == "__main__":
         cfg.init_time = exp_name
     else:
         cfg.init_time = f'{cfg.init_time}_{strftime("%y%m%d%H%M%S", localtime())}'
-    run_kfold(cfg, use_pretrained)  # Expected average of Best Metrics on Each Valid Set: 0.747354 @ 200903214601
+
+    # Expected average of Best Metrics on Each Valid Set: 0.747354 @ 200903214601
+    run_kfold(cfg, use_pretrained, get_cmd_args.predict_on_private)
 
     # Experiment with other parameters
     # cfg = Config()
