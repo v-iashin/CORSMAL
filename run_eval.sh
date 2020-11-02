@@ -16,7 +16,7 @@ DEVICES=$(echo $NVIDIA_VISIBLE_DEVICES | tr ',' ' ')
 cd ./filling_level/vggish
 bash ./extract_features.sh "0" $DATA_ROOT $FIRST_EVAL_CONTAINER
 cd ../r21d_rgb
-bash ./extract_features.sh $DEVICES $DATA_ROOT $FIRST_EVAL_CONTAINER
+bash ./extract_features.sh "$DEVICES" $DATA_ROOT $FIRST_EVAL_CONTAINER
 cd ../../
 
 # making sure we are not in 'base' or any other env
@@ -41,8 +41,8 @@ cd ./filling_type/vggish
 python main.py --predict_on_private
 cd ../../
 
-# Filling level R(2+1)d
-cd ./filling_level/r21d_rgb
+# Filling type R(2+1)d
+cd ./filling_type/r21d_rgb
 # remove `--predict_on_private` if you don't have it and it will make predictions only for public test set
 python main.py --predict_on_private
 cd ../../

@@ -64,8 +64,8 @@ docker pull iashin/corsmal:latest
 # because, by default, it will run the evaluation script
 docker run \
     --mount type=bind,source=/path/to/corsmal/,destination=/home/ubuntu/CORSMAL/dataset/ \
-    -it --gpus '"device=0,1,2,3"' \
-    corsmal:latest
+    -it --gpus '"device=0,1"' \
+    iashin/corsmal:latest
 
 # copy submission files from the container once it finishes running the script
 docker cp container_id:/home/ubuntu/CORSMAL/submission_public_test.csv .
