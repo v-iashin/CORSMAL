@@ -8,13 +8,13 @@ source /home/ubuntu/miniconda3/etc/profile.d/conda.sh
 echo "STARTING PART 1/3..."
 # `10` means containers with ids `10`, `11`, `12` etc are going to be used (enough for evaluation)
 # if `1` then all containers will be used
-FIRST_EVAL_CONTAINER=10
+FIRST_EVAL_CONTAINER=1
 # NVIDIA_VISIBLE_DEVICES lists all devices available to the docker container. They are comma-separated
 # if outside docker. replace with "0 1 2 3" or any other device ids you have
 DEVICES=$(echo $NVIDIA_VISIBLE_DEVICES | tr ',' ' ')
 # extract features (we will use only one device for vggish as it is faster in the vggish case)
 cd ./filling_level/vggish
-bash ./extract_features.sh "0" $DATA_ROOT $FIRST_EVAL_CONTAINER
+bash ./extract_features.sh "$DEVICES" $DATA_ROOT $FIRST_EVAL_CONTAINER
 cd ../r21d_rgb
 bash ./extract_features.sh "$DEVICES" $DATA_ROOT $FIRST_EVAL_CONTAINER
 cd ../../

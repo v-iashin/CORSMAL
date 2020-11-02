@@ -47,7 +47,7 @@ Each folder in this repo corresponds to a dedicated task. Filling level and type
 ## How to run evaluation?
 
 We recommend to use our docker image to run the evaluation script. (To experement with different approaches, inspect individual README files inside of the task folders.)
-Running the script will take ~3 hours on 10-core i9-7900X X-series, 4x1080Ti (one gpu is enough), RAM 64Gb (or at least 20Gb), 30Gb of extra disk space (besides the dataset).
+Running the script will take ~3 hours on 10-core i9-7900X X-series, 4x1080Ti (one gpu is enough), RAM 64Gb (or at least 20Gb but the more GPU you will use the more RAM it will allocate), 30Gb of extra disk space (besides the dataset).
 
 Clone the repo recursively (with all submodules):
 ```bash
@@ -62,9 +62,10 @@ docker pull iashin/corsmal:latest
 # source: the path to dir with corsmal on the host; destination: path where the sorce folder will be mounted
 # if you would like to attach shell (and debug) just append `/bin/bash` to the command above
 # because, by default, it will run the evaluation script
+# Also, the script will work even with just one GPU but if you would like to speed up the 1st part try more
 docker run \
     --mount type=bind,source=/path/to/corsmal/,destination=/home/ubuntu/CORSMAL/dataset/ \
-    -it --gpus '"device=0,1"' \
+    -it --gpus '"device=0,1,2,3"' \
     iashin/corsmal:latest
 
 # copy submission files from the container once it finishes running the script
