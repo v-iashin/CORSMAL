@@ -36,7 +36,6 @@ RUN git clone --recursive https://github.com/v-iashin/CORSMAL.git
 
 WORKDIR /home/ubuntu/CORSMAL/
 
-# TODO
 RUN git checkout docker
 
 RUN curl https://storage.googleapis.com/audioset/vggish_model.ckpt -o ./filling_level/vggish/video_features/models/vggish/checkpoints/vggish_model.ckpt
@@ -48,7 +47,4 @@ RUN conda env create -f ./capacity/LoDE_linux.yml
 
 RUN conda clean -afy
 
-RUN cd ./filling_level/CORSMAL-pyAudioAnalysis && curl -O https://raw.githubusercontent.com/v-iashin/CORSMAL-pyAudioAnalysis/master/gather_final_dataset.sh
-RUN cd ./filling_type/CORSMAL-pyAudioAnalysis && curl -O https://raw.githubusercontent.com/v-iashin/CORSMAL-pyAudioAnalysis/master/gather_final_dataset.sh
-RUN cd ./filling_level/CORSMAL-pyAudioAnalysis/src && curl -O https://raw.githubusercontent.com/v-iashin/CORSMAL-pyAudioAnalysis/master/src/apply_existing_model.py
-RUN cd ./filling_type/CORSMAL-pyAudioAnalysis/src && curl -O https://raw.githubusercontent.com/v-iashin/CORSMAL-pyAudioAnalysis/master/src/apply_existing_model.py
+CMD [ "bash", "run_eval.sh" ]
