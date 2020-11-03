@@ -36,8 +36,6 @@ RUN git clone --recursive https://github.com/v-iashin/CORSMAL.git
 
 WORKDIR /home/ubuntu/CORSMAL/
 
-RUN git checkout docker
-
 RUN curl https://storage.googleapis.com/audioset/vggish_model.ckpt -o ./filling_level/vggish/video_features/models/vggish/checkpoints/vggish_model.ckpt
 RUN conda env create -f ./filling_level/vggish/video_features/conda_env_vggish.yml
 RUN conda env create -f ./filling_level/r21d_rgb/video_features/conda_env_r21d.yml
