@@ -44,6 +44,7 @@ from libs.detection.detection import imageSegmentation
 import utilities
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 object_set = ['10', '11', '12']
+phase = 'public_test'
 frame_set = ['1', '20']
 modality_set = ['rgb', 'ir', 'depth']
 average_training_set = 734.94
@@ -71,9 +72,9 @@ class LoDE:
     def getObjectDimensions(self, file_id, frame):
 
         if frame == '1':
-            f = open('{}/estimation_1.csv'.format(self.output_path), 'a+', newline='')
+            f = open('{}/estimation_1_{}.csv'.format(self.output_path, phase), 'a+', newline='')
         elif frame == '20':
-            f = open('{}/estimation_20.csv'.format(self.output_path), 'a+', newline='')
+            f = open('{}/estimation_20_{}.csv'.format(self.output_path, phase), 'a+', newline='')
         try:
             centroid1, contour1 = getCentroid(self.c1['seg'])
             centroid2, contour2 = getCentroid(self.c2['seg'])
@@ -155,20 +156,21 @@ class LoDE:
 
     def run(self):
 
-        calibration_path = './dataset/calibration/{}'.format(args.object)
+        calibration_path = os.path.join(args.data_path, args.object, 'calib')
         image_path = './dataset/images/{}/{}'.format(args.object, frame)
 
         # path exists?
-        if not os.path.isdir(calibration_path):
-            print("Can't find path "+calibration_path)
-            return
+        assert os.path.isdir(calibration_path), "Can't find path "+calibration_path
+        # if not os.path.isdir(calibration_path):
+        #     print("Can't find path "+calibration_path)
+        #     return
 
         # list all files in the calibration, so we will have a list
         # match their "id" part, to later find the same case in other folders
         file_pattern = r"([\w\d_]+)_c1_calib.pickle"
         file_id_list = [re.match(file_pattern, f).group(1) for f in os.listdir(calibration_path) if re.match(file_pattern, f)]
 
-        for fid in file_id_list:
+        for fid in sorted(file_id_list):
             # Read camera calibration files
             self.readCalibration(calibration_path, fid)
             # Main loop
@@ -185,23 +187,49 @@ if __name__ == '__main__':
     parser.add_argument('--background', type=int, default=0)
     parser.add_argument('--lighting', type=int, default=0)
     #parser.add_argument('--data_path', type=str, default='/video_database/')
-    parser.add_argument('--data_path',  help='Path to the database directory.'),\
+    parser.add_argument('--data_path',  help='Path to the database directory.')
     parser.add_argument('--draw', default=False, action='store_true', help='Output visual results in ./results')
+    parser.add_argument('--predict_on_private', dest='predict_on_private', action='store_true', default=False)
     args = parser.parse_args()
 
-    print('Executing...')
-    lode = LoDE(args)
-    output_path = 'results'
-    for frame in frame_set:
-        if frame == '1':
-            f = open('{}/estimation_1.csv'.format(output_path), 'w', newline='')
-        elif frame == '20':
-            f = open('{}/estimation_20.csv'.format(output_path), 'w', newline='')
-        with f:
-            writer = csv.writer(f)
-            writer.writerow(['fileName','height[mm]','width[mm]','capacity[mL]', 'frame'])
-        f.close()
-        for args.object in object_set:
-            lode.run()
-    utilities.combine_results_csv(average_training_set)
+    # patching the list of object ids to use
+    if args.predict_on_private:
+        phase = 'private_test'
+        object_set = ['13', '14', '15']
+
+        print(f'Executing on {object_set} containers...')
+        lode = LoDE(args)
+        output_path = 'results'
+        for frame in frame_set:
+            if frame == '1':
+                f = open('{}/estimation_1_{}.csv'.format(output_path, phase), 'w', newline='')
+            elif frame == '20':
+                f = open('{}/estimation_20_{}.csv'.format(output_path, phase), 'w', newline='')
+            with f:
+                writer = csv.writer(f)
+                writer.writerow(['fileName','height[mm]','width[mm]','capacity[mL]', 'frame'])
+            f.close()
+            for args.object in object_set:
+                lode.run()
+        utilities.combine_results_csv(average_training_set, phase)
+    else:
+        phase = 'public_test'
+        object_set = ['10', '11', '12']
+
+        print(f'Executing on {object_set} containers...')
+        lode = LoDE(args)
+        output_path = 'results'
+        for frame in frame_set:
+            if frame == '1':
+                f = open('{}/estimation_1_{}.csv'.format(output_path, phase), 'w', newline='')
+            elif frame == '20':
+                f = open('{}/estimation_20_{}.csv'.format(output_path, phase), 'w', newline='')
+            with f:
+                writer = csv.writer(f)
+                writer.writerow(['fileName','height[mm]','width[mm]','capacity[mL]', 'frame'])
+            f.close()
+            for args.object in object_set:
+                lode.run()
+        utilities.combine_results_csv(average_training_set, phase)
+
     print('Completed!')

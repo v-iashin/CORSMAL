@@ -1,6 +1,6 @@
 import sys
 sys.path.insert(0, '../../filling_level/vggish/')  # nopep8
-from main import Config, run_kfold
+from main import Config, run_kfold, get_cmd_args
 from time import localtime, strftime
 # import argparse
 
@@ -16,7 +16,8 @@ if __name__ == "__main__":
         cfg.init_time = exp_name
     else:
         cfg.init_time = f'{cfg.init_time}_{strftime("%y%m%d%H%M%S", localtime())}'
-    run_kfold(cfg, use_pretrained)  # Expected average of Best Metrics on Each Valid Set: 0.912957 @ 200903163404
+    # Expected average of Best Metrics on Each Valid Set: 0.912957 @ 200903163404
+    run_kfold(cfg, use_pretrained, get_cmd_args().predict_on_private)
 
     # Experiment with other parameters
     # cfg = Config()

@@ -35,19 +35,22 @@ The `calibration` folder will be already included in the correct folder when dow
 <DATABASE_PATH>
 ├── 10
 │   ├── depth
+│   ├── calib
 │   ├── ir
 │   └── rgb
 ├── 11
 │   ├── depth
+│   ├── calib
 │   ├── ir
 │   └── rgb
 └── 12
     ├── depth
+    ├── calib
     ├── ir
     └── rgb
 ```
 
-The code will extract frames from the videos presents in __PATH_TO_DATABASE__ and will move them into the corresponding __.\dataset__ folder. 
+The code will extract frames from the videos presents in __PATH_TO_DATABASE__ and will move them into the corresponding __.\dataset__ folder.
 
 # Run on the Test Set
 Run LoDE on the whole testing set
