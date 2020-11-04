@@ -46,8 +46,9 @@ Each folder in this repo corresponds to a dedicated task. Filling level and type
 
 ## How to run evaluation?
 
-We recommend to use our docker image to run the evaluation script. (To experement with different approaches, inspect individual README files inside of the task folders.)
-Running the script will take ~3 hours on 10-core i9-7900X X-series, 4x1080Ti (one gpu is enough), RAM 64Gb (or at least 20Gb but the more GPU you will use the more RAM it will allocate), 40Gb of extra disk space (besides the dataset).
+We recommend to use our docker image to run the evaluation script. (To experement with different approaches, inspect individual README files inside of the task folders.) Another way to run it without docker is to install the environments using the commands from `Dockerfile` (ignore the first 11 lines) and execute `run_eval.sh` script.
+
+Running the script will take <4 hours on 10-core i9-7900X X-series, 4x1080Ti (one gpu is enough), RAM 64Gb (or at least 20Gb but the more GPU you will use the more RAM it will allocate), 40Gb of extra disk space (besides the dataset).
 
 [Install docker](https://docs.docker.com/engine/install/) (19.03.13) and run our script
 ```bash
