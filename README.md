@@ -9,8 +9,8 @@
 
 # The CORSMAL Challenge 2020 Submission
 
-- The 🏆 Top-1 Submission to [CORSMAL Challenge 2020 (ICPR Challenge)](https://corsmal.eecs.qmul.ac.uk/ICPR2020challenge.html).
-- The 🏆 Winning Solution (in all sub-tasks) to the 3-day competition on the CORSMAL challenge organized among participants of the [Intelligent Sensing Summer School (1–4 September 2020)](http://cis.eecs.qmul.ac.uk/school2020.html).
+- 🏆 The Top-1 Submission to [CORSMAL Challenge 2020 (ICPR Challenge)](https://corsmal.eecs.qmul.ac.uk/ICPR2020challenge.html).
+- 🏆 The Winning Solution (in all sub-tasks) to the 3-day competition on the CORSMAL challenge organized among participants of the [Intelligent Sensing Summer School (1–4 September 2020)](http://cis.eecs.qmul.ac.uk/school2020.html).
 
 The design of an individual model for each sub-task: container filling level (left), filling type (middle) classification, and container capacity estimation (right).
 
