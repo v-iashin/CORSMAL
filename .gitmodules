@@ -4,3 +4,9 @@
 [submodule "filling_level/vggish/video_features"]
 	path = filling_level/vggish/video_features
 	url = https://github.com/v-iashin/video_features.git
+[submodule "filling_level/CORSMAL-pyAudioAnalysis"]
+	path = filling_level/CORSMAL-pyAudioAnalysis
+	url = https://github.com/gokhansolak/CORSMAL-pyAudioAnalysis.git
+[submodule "filling_type/CORSMAL-pyAudioAnalysis"]
+	path = filling_type/CORSMAL-pyAudioAnalysis
+	url = https://github.com/gokhansolak/CORSMAL-pyAudioAnalysis.git
