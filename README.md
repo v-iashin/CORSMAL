@@ -20,13 +20,13 @@ For the **filling level** estimation we rely on both modalities: RGB (R(2+1)d fe
 
 The procedure for **filling type** classification resembles the one for the filling level except for the absence of RGB stream.
 
-The **capacity estimation** pipeline starts with the extraction of two frames from one camera view: the 1st and the 20th frames to the end. Both frames are passed through the Mask R-CNN to detect a container. The detected bounding boxes are used to crop both frames. The crops are sent to the LoDE model which outputs the estimation of the container capacity. If an object was not detected on either of the frames, we use the training prior.
+The **capacity estimation** pipeline starts with the extraction of two frames from two camera views (left and right): the 1st and the 20th frames to the end. Both frames are passed through the Mask R-CNN to detect a container. The detected bounding boxes are used to crop both frames. The crops are sent to the LoDE model which outputs the estimation of the container capacity. If an object was not detected on either of the frames, we use the training prior.
 
 ## Team 👋
 - Gokhan Solak ([LinkedIn](https://www.linkedin.com/in/gkhnsolak/), g.solak@qmul.ac.uk)
 - Francesca Palermo ([LinkedIn](https://www.linkedin.com/in/francesca-palermo-a9107a40/), f.palermo@qmul.ac.uk)
 - Claudio Coppola ([LinkedIn](https://www.linkedin.com/in/clcoppola/), c.coppola@qmul.ac.uk)
-- Vladimir Iashin ([LinkedIn](https://www.linkedin.com/in/vladimir-iashin/), vladimir.d.iashin@gmail.com)
+- Vladimir Iashin ([LinkedIn](https://www.linkedin.com/in/vladimir-iashin/), vladimir.iashin@tuni.fi)
 
 ## Task
 The CORSMAL challenge focuses on the estimation of the weight of containers which depends on the presence of a filling and its amount and type, in addition to the container capacity. Participants should determine the physical properties of a container while it is manipulated by a human, when both containers and fillings are not known a priori.
