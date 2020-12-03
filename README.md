@@ -1,16 +1,22 @@
 - [The CORSMAL Challenge 2020 Submission](#the-corsmal-challenge-2020-submission)
+  - [Overview 🔎](#overview-)
   - [Team 👋](#team-)
-  - [Task](#task)
+  - [Task ⚔️](#task-️)
   - [Dataset 🥤📘🥛](#dataset-)
-  - [Code organization](#code-organization)
-  - [How to run evaluation?](#how-to-run-evaluation)
-  - [How to train a new model?](#how-to-train-a-new-model)
-  - [License](#license)
+  - [Code organization 📁](#code-organization-)
+  - [How to run evaluation ❔](#how-to-run-evaluation-)
+  - [How to train a new model? 🚀](#how-to-train-a-new-model-)
+  - [License 👩‍⚖️](#license-️)
+  - [BibTeX 🙂](#bibtex-)
 
 # The CORSMAL Challenge 2020 Submission
 
 - 🏆 The Top-1 Submission to [CORSMAL Challenge 2020 (ICPR Challenge)](https://corsmal.eecs.qmul.ac.uk/ICPR2020challenge.html).
 - 🏆 The Winning Solution (in all sub-tasks) to the 3-day competition on the CORSMAL challenge organized among participants of the [Intelligent Sensing Summer School (1–4 September 2020)](http://cis.eecs.qmul.ac.uk/school2020.html).
+
+**We also composed a [Tech Report](https://arxiv.org/abs/2012.01311) 📖. Feel free to check it out to learn more about the implemetation details.**
+
+## Overview 🔎
 
 The design of an individual model for each sub-task: container filling level (left), filling type (middle) classification, and container capacity estimation (right).
 
@@ -22,13 +28,15 @@ The procedure for **filling type** classification resembles the one for the fill
 
 The **capacity estimation** pipeline starts with the extraction of two frames from two camera views (left and right): the 1st and the 20th frames to the end. Both frames are passed through the Mask R-CNN to detect a container. The detected bounding boxes are used to crop both frames. The crops are sent to the LoDE model which outputs the estimation of the container capacity. If an object was not detected on either of the frames, we use the training prior.
 
+Feel hungry for more details, check out our [Tech Report](https://arxiv.org/abs/2012.01311) 📖.
+
 ## Team 👋
 - Gokhan Solak ([LinkedIn](https://www.linkedin.com/in/gkhnsolak/), g.solak@qmul.ac.uk)
 - Francesca Palermo ([LinkedIn](https://www.linkedin.com/in/francesca-palermo-a9107a40/), f.palermo@qmul.ac.uk)
 - Claudio Coppola ([LinkedIn](https://www.linkedin.com/in/clcoppola/), c.coppola@qmul.ac.uk)
 - Vladimir Iashin ([LinkedIn](https://www.linkedin.com/in/vladimir-iashin/), vladimir.iashin@tuni.fi)
 
-## Task
+## Task ⚔️
 The CORSMAL challenge focuses on the estimation of the weight of containers which depends on the presence of a filling and its amount and type, in addition to the container capacity. Participants should determine the physical properties of a container while it is manipulated by a human, when both containers and fillings are not known a priori.
 
 Technically, the main task requires to estimate the  overall  filling  mass  estimation. This quantity can be estimated by solving three sub-tasks:
@@ -50,7 +58,7 @@ Technically, the main task requires to estimate the  overall  filling  mass  est
         - calibration
     - 8-channel 44.1 kHz audio;
 
-## Code organization
+## Code organization 📁
 
 Each folder in this repo corresponds to a dedicated task. Filling level and types have two or three different approaches and, hence, each approach has an individual folder.
 - `/capacity`
@@ -65,7 +73,7 @@ Each folder in this repo corresponds to a dedicated task. Filling level and type
     - `/vggish`
     - `README.md`
 
-## How to run evaluation?
+## How to run evaluation ❔
 
 We recommend to use our docker image to run the evaluation script. (To experement with different approaches, inspect individual README files inside of the task folders.) Another way to run it without docker is to install the environments using the commands from `Dockerfile` (ignore the first 11 lines) and execute `run_eval.sh` script.
 
@@ -119,11 +127,23 @@ DATA_ROOT
 
 Please note, we undertook extreme care to make sure our results are reproducible by fixing the seeds, sharing the pre-trained models, and package versions. However, the training on another hardware might give you _slightly_ different results. We observed that the change is 🤏  `<0.01`.
 
-## How to train a new model?
+## How to train a new model? 🚀
 Please follow the instructions provided in `filling_level` and `filling_type`. Note, we do not use any training for `capacity` sub-task but you still can adapt the code to apply it on your dataset.
 
-## License
+## License 👩‍⚖️
 We distribute our code under MIT licence. Yet, our code relies on libraries which have different licence.
 - LoDE (container capacity): Creative Commons Attribution-NonCommercial 4.0
 - pyAudioAnalysis (filling level and type): Apache-2.0 License
 - video_features (filling level and type): [check here: ](https://github.com/v-iashin/video_features/tree/e0eba1b738e3ec7db81c3584581e53eb9df06665)
+
+## BibTeX 🙂
+```
+@misc{CORSMAL_Iashin_2020,
+      title={Top-1 CORSMAL Challenge 2020 Submission: Filling Mass Estimation Using Multi-modal Observations of Human-robot Handovers},
+      author={Vladimir Iashin and Francesca Palermo and G\"okhan Solak and Claudio Coppola},
+      year={2020},
+      eprint={2012.01311},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+```
