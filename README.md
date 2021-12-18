@@ -99,7 +99,8 @@ docker cp container_id:/home/ubuntu/CORSMAL/submission_public_test.csv .
 docker cp container_id:/home/ubuntu/CORSMAL/submission_private_test.csv .
 ```
 
-The expected structure of the `DATA_ROOT` folder:
+The expected structure of the `DATA_ROOT` folder (it came to our attention that the folder structure of the 
+dataset has changed in the following editions of the challenge):
 ```
 DATA_ROOT
 ├── [1-9]
